@@ -496,17 +496,27 @@ int32 doSynthSkillUp(CCharEntity* PChar)
         }
 
         uint8  skillRank = PChar->RealSkills.rank[skillID]; // Check character rank
-        uint16 maxSkill  = (skillRank+1)*100;               // Skill cap, depending on rank        
+        uint16 maxSkill  = (skillRank+1)*100;               // Skill cap, depending on rank    
+        bool   allowSkillup = 1;                            // Allows skillup to cont. 
 
         int32  charSkill = PChar->RealSkills.skill[skillID]; // Compare against real character skill, without image support, gear or moghancements
         int32  baseDiff   = PChar->CraftContainer->getQuantity(skillID-40) - charSkill/10; //the 5 lvl difference rule for breaks does NOT consider the effects of image support/gear
-
+        
         if ((baseDiff <= 0) || ((baseDiff > 5) && (PChar->CraftContainer->getQuantity(0) == SYNTHESIS_FAIL))) // synthesis result is stored in the zero cell quantity
         {
             continue;
         }
 
-        if (charSkill < maxSkill)
+         // Only a single skill can be over 60 - Kbtaru 5-31-20
+        for  (uint8 skillCheck = 49; skillCheck < 57; ++skillCheck)
+        {
+            if (charSkill = skillCheck)
+                ++skillCheck;  
+            else if (PChar->RealSkills.rank[skillCheck] > 6) //If skill level is over 60
+                allowSkillup = 0;
+         }
+
+        if ((charSkill < maxSkill) && (allowSkillup))
         {
             double skillUpChance = ((double)baseDiff*(map_config.craft_chance_multiplier - (log(1.2 + charSkill/100))))/10;
 
