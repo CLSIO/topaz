@@ -80,6 +80,8 @@
 #include "../ai/states/magic_state.h"
 #include <optional>
 #include "../battlefield.h"
+#include "../daily_system.h"
+#include "../packets/char_emotion.h"
 
 namespace luautils
 {
@@ -150,6 +152,7 @@ namespace luautils
 
         lua_register(LuaHandle, "getAbility", luautils::getAbility);
         lua_register(LuaHandle, "getSpell", luautils::getSpell);
+        lua_register(LuaHandle, "SelectDailyItem", luautils::SelectDailyItem);
 
         Lunar<CLuaAbility>::Register(LuaHandle);
         Lunar<CLuaAction>::Register(LuaHandle);
@@ -186,9 +189,13 @@ namespace luautils
 
     int32 free()
     {
-        ShowStatus(CL_WHITE"luautils::free" CL_RESET":lua free...");
-        lua_close(LuaHandle);
-        ShowMessage("\t - " CL_GREEN"[OK]" CL_RESET"\n");
+        if(LuaHandle)
+        {
+            ShowStatus(CL_WHITE"luautils::free" CL_RESET":lua free...");
+            lua_close(LuaHandle);
+            LuaHandle = nullptr;
+            ShowMessage("\t - " CL_GREEN"[OK]" CL_RESET"\n");
+        }
         return 0;
     }
 
@@ -338,8 +345,8 @@ namespace luautils
 
             if (!lua_isnil(L, 2) && lua_isuserdata(L, 2))
             {
-                CLuaBaseEntity* PLuaBaseEntity = Lunar<CLuaBaseEntity>::check(L, 2);
-                PInstance = PLuaBaseEntity->GetBaseEntity()->PInstance;
+                CLuaInstance* PLuaInstance = Lunar<CLuaInstance>::check(L, 2);
+                PInstance = PLuaInstance->GetInstance();
             }
 
             CBaseEntity* PNpc = nullptr;
@@ -394,7 +401,7 @@ namespace luautils
             }
             if (PInstance)
             {
-                PInstance->GetEntity(mobid & 0xFFF, TYPE_MOB | TYPE_PET);
+                PMob = PInstance->GetEntity(mobid & 0xFFF, TYPE_MOB | TYPE_PET);
             }
             else
             {
@@ -702,8 +709,8 @@ namespace luautils
         if (!lua_isnil(L, 1) && lua_isnumber(L, 1))
         {
             int32 offset = (int32)lua_tointeger(L, 1);
-
-            CVanaTime::getInstance()->setCustomOffset(offset);
+            int32 custom = CVanaTime::getInstance()->getCustomEpoch();
+            CVanaTime::getInstance()->setCustomEpoch((custom ? custom : VTIME_BASEDATE) - offset);
 
             lua_pushboolean(L, true);
             return 1;
@@ -1497,8 +1504,7 @@ namespace luautils
 
     int32 OnEventUpdate(CCharEntity* PChar, uint16 eventID, uint32 result, uint16 extras)
     {
-        int32 oldtop = lua_gettop(LuaHandle);
-
+        lua_gettop(LuaHandle);
         lua_pushnil(LuaHandle);
         lua_setglobal(LuaHandle, "onEventUpdate");
 
@@ -2690,7 +2696,7 @@ namespace luautils
 
         lua_prepscript("scripts/zones/%s/mobs/%s.lua", PMob->loc.zone->GetName(), PMob->GetName());
 
-        if (PTarget->objtype != TYPE_PET && PTarget->objtype != TYPE_MOB)
+        if (PTarget->objtype == TYPE_PC)
         {
             ((CCharEntity*)PTarget)->m_event.reset();
             ((CCharEntity*)PTarget)->m_event.Target = PMob;
@@ -2887,9 +2893,21 @@ namespace luautils
         else
         {
             int8 File[255];
-            memset(File, 0, sizeof(File));
-            PMob->objtype == TYPE_PET ? snprintf((char*)File, sizeof(File), "scripts/globals/pets/%s.lua", static_cast<CPetEntity*>(PMob)->GetScriptName().c_str()) :
-                snprintf((char*)File, sizeof(File), "scripts/zones/%s/mobs/%s.lua", PMob->loc.zone->GetName(), PMob->GetName());;
+            switch (PMob->objtype)
+            {
+            case TYPE_MOB:
+                snprintf((char*)File, sizeof(File), "scripts/zones/%s/mobs/%s.lua", PMob->loc.zone->GetName(), PMob->GetName());
+                break;
+            case TYPE_PET:
+                snprintf((char*)File, sizeof(File), "scripts/globals/pets/%s.lua", static_cast<CPetEntity*>(PMob)->GetScriptName().c_str());
+                break;
+            case TYPE_TRUST:
+                snprintf((char*)File, sizeof(File), "scripts/globals/spells/trust/%s.lua", PMob->GetName());
+                break;
+            default:
+                ShowWarning("luautils::onMobDeath (%d): unknown objtype\n", PMob->objtype);
+                break;
+            }
 
             lua_pushnil(LuaHandle);
             lua_setglobal(LuaHandle, "onMobDeath");
@@ -2937,8 +2955,22 @@ namespace luautils
         TPZ_DEBUG_BREAK_IF(PMob == nullptr);
 
         int8 File[255];
-        PMob->objtype == TYPE_PET ? snprintf((char*)File, sizeof(File), "scripts/globals/pets/%s.lua", static_cast<CPetEntity*>(PMob)->GetScriptName().c_str()) :
+        switch (PMob->objtype)
+        {
+        case TYPE_MOB:
             snprintf((char*)File, sizeof(File), "scripts/zones/%s/mobs/%s.lua", PMob->loc.zone->GetName(), PMob->GetName());
+            break;
+        case TYPE_PET:
+            snprintf((char*)File, sizeof(File), "scripts/globals/pets/%s.lua", static_cast<CPetEntity*>(PMob)->GetScriptName().c_str());
+            break;
+        case TYPE_TRUST:
+            snprintf((char*)File, sizeof(File), "scripts/globals/spells/trust/%s.lua", PMob->GetName());
+            break;
+        default:
+            ShowWarning("luautils::onMobSpawn (%d): unknown objtype\n", PMob->objtype);
+            break;
+        }
+
         if (prepFile(File, "onMobSpawn"))
         {
             return -1;
@@ -2946,7 +2978,6 @@ namespace luautils
 
         CLuaBaseEntity LuaMobEntity(PMob);
         Lunar<CLuaBaseEntity>::push(LuaHandle, &LuaMobEntity);
-
 
         if (lua_pcall(LuaHandle, 1, 0, 0))
         {
@@ -3024,8 +3055,21 @@ namespace luautils
         TPZ_DEBUG_BREAK_IF(PMob == nullptr);
 
         int8 File[255];
-        PMob->objtype == TYPE_PET ? snprintf((char*)File, sizeof(File), "scripts/globals/pets/%s.lua", static_cast<CPetEntity*>(PMob)->GetScriptName().c_str()) :
+        switch (PMob->objtype)
+        {
+        case TYPE_MOB:
             snprintf((char*)File, sizeof(File), "scripts/zones/%s/mobs/%s.lua", PMob->loc.zone->GetName(), PMob->GetName());
+            break;
+        case TYPE_PET:
+            snprintf((char*)File, sizeof(File), "scripts/globals/pets/%s.lua", static_cast<CPetEntity*>(PMob)->GetScriptName().c_str());
+            break;
+        case TYPE_TRUST:
+            snprintf((char*)File, sizeof(File), "scripts/globals/spells/trust/%s.lua", PMob->GetName());
+            break;
+        default:
+            ShowWarning("luautils::onMobDespawn (%d): unknown objtype\n", PMob->objtype);
+            break;
+        }
 
         if (prepFile(File, "onMobDespawn"))
         {
@@ -3144,7 +3188,7 @@ namespace luautils
     *                                                                       *
     ************************************************************************/
 
-    std::tuple<int32, uint8, uint8> OnUseWeaponSkill(CCharEntity* PChar, CBaseEntity* PMob, CWeaponSkill* wskill, uint16 tp, bool primary, action_t& action, CBattleEntity* taChar)
+    std::tuple<int32, uint8, uint8> OnUseWeaponSkill(CBattleEntity* PChar, CBaseEntity* PMob, CWeaponSkill* wskill, uint16 tp, bool primary, action_t& action, CBattleEntity* taChar)
     {
         lua_prepscript("scripts/globals/weaponskills/%s.lua", wskill->getName());
 
@@ -4498,6 +4542,490 @@ namespace luautils
             ShowError("luautils::onFurnitureRemoved: %s\n", lua_tostring(LuaHandle, -1));
             lua_pop(LuaHandle, 1);
         }
+    }
+
+    int32 SelectDailyItem(lua_State* L)
+    {
+        TPZ_DEBUG_BREAK_IF(lua_isnil(L, 1) || !lua_isuserdata(L, 1));
+        TPZ_DEBUG_BREAK_IF(lua_isnil(L, 2) || !lua_isnumber(L, 2));
+        CLuaBaseEntity* PLuaBaseEntity = Lunar<CLuaBaseEntity>::check(L, 1);
+        CCharEntity* player = (CCharEntity*)PLuaBaseEntity->GetBaseEntity();
+        lua_pushinteger(L, daily::SelectItem(player, (uint8)lua_tointeger(L, 2)));
+        return 1;
+    }
+
+    void OnPlayerEmote(CCharEntity* PChar, Emote EmoteID)
+    {
+        lua_prepscript("scripts/globals/player.lua");
+
+        if (prepFile(File, "onPlayerEmote"))
+            return;
+
+        CLuaBaseEntity LuaBaseEntity(PChar);
+        Lunar<CLuaBaseEntity>::push(LuaHandle, &LuaBaseEntity);
+
+        lua_pushinteger(LuaHandle, (uint8)EmoteID);
+
+        if (lua_pcall(LuaHandle, 2, 0, 0))
+        {
+            ShowError("luautils::onEmote: %s\n", lua_tostring(LuaHandle, -1));
+            lua_pop(LuaHandle, 1);
+            return;
+        }
+    }
+	
+	
+	    /********************************************************************
+        onFishingStart - callback when you start fishing
+    *********************************************************************/
+    int32 OnFishingStart(CCharEntity * PChar, int32 RodID, int32 BaitID, int32 AreaID)
+    {
+        lua_prepscript("scripts/zones/%s/Zone.lua", PChar->loc.zone->GetName());
+
+        if (prepFile(File, "onFishingStart"))
+        {
+            return -1;
+        }
+        CLuaBaseEntity LuaBaseEntity(PChar);
+        Lunar<CLuaBaseEntity>::push(LuaHandle, &LuaBaseEntity);
+
+        lua_pushinteger(LuaHandle, RodID);
+        lua_pushinteger(LuaHandle, BaitID);
+        lua_pushinteger(LuaHandle, AreaID);
+
+        if (lua_pcall(LuaHandle, 4, 0, 0))
+        {
+            ShowError("luautils::onFishingStart: %s\n", lua_tostring(LuaHandle, -1));
+            lua_pop(LuaHandle, 1);
+            return -1;
+        }
+
+        return 0;
+    }
+
+    int PushFishList(lua_State* L, std::vector<fish_t>* FishList) {
+        lua_newtable(L);
+        int counter = 0;
+        if (FishList != nullptr) {
+            for (std::vector<fish_t>::iterator fish = FishList->begin(); fish != FishList->end(); ++fish) {
+                lua_pushnumber(L, ++counter);
+                lua_newtable(L);
+
+                lua_pushstring(L, "id");
+                lua_pushnumber(L, fish->fishId);
+                lua_settable(L, -3);
+                lua_pushstring(L, "name");
+                lua_pushstring(L, fish->fishName.c_str());
+                lua_settable(L, -3);
+                lua_pushstring(L, "minSkill");
+                lua_pushnumber(L, fish->minSkill);
+                lua_settable(L, -3);
+                lua_pushstring(L, "maxSkill");
+                lua_pushnumber(L, fish->maxSkill);
+                lua_settable(L, -3);
+                lua_pushstring(L, "size");
+                lua_pushnumber(L, fish->size);
+                lua_settable(L, -3);
+                lua_pushstring(L, "baseDelay");
+                lua_pushnumber(L, fish->baseDelay);
+                lua_settable(L, -3);
+                lua_pushstring(L, "baseMove");
+                lua_pushnumber(L, fish->baseMove);
+                lua_settable(L, -3);
+                lua_pushstring(L, "minLength");
+                lua_pushnumber(L, fish->minLength);
+                lua_settable(L, -3);
+                lua_pushstring(L, "maxLength");
+                lua_pushnumber(L, fish->maxLength);
+                lua_settable(L, -3);
+                lua_pushstring(L, "sizeType");
+                lua_pushnumber(L, fish->sizeType);
+                lua_settable(L, -3);
+                lua_pushstring(L, "waterType");
+                lua_pushnumber(L, fish->waterType);
+                lua_settable(L, -3);
+                lua_pushstring(L, "log");
+                lua_pushnumber(L, fish->log);
+                lua_settable(L, -3);
+                lua_pushstring(L, "quest");
+                lua_pushnumber(L, fish->quest);
+                lua_settable(L, -3);
+                lua_pushstring(L, "item");
+                lua_pushnumber(L, fish->item);
+                lua_settable(L, -3);
+                lua_pushstring(L, "maxhook");
+                lua_pushnumber(L, fish->maxhook);
+                lua_settable(L, -3);
+                lua_pushstring(L, "rarity");
+                lua_pushnumber(L, fish->rarity);
+                lua_settable(L, -3);
+                lua_pushstring(L, "reqKeyItem");
+                lua_pushnumber(L, fish->reqKeyItem);
+                lua_settable(L, -3);
+                lua_pushstring(L, "lurePower");
+                lua_pushnumber(L, fish->lurePower);
+                lua_settable(L, -3);
+                lua_pushstring(L, "minLength");
+                lua_pushnumber(L, fish->minLength);
+                lua_settable(L, -3);
+                lua_pushstring(L, "maxLength");
+                lua_pushnumber(L, fish->maxLength);
+                lua_settable(L, -3);
+                lua_pushstring(L, "legendary");
+                lua_pushnumber(L, fish->legendary);
+                lua_settable(L, -3);
+                lua_pushstring(L, "legendaryFlags");
+                lua_pushnumber(L, fish->legendary_flags);
+                lua_settable(L, -3);
+                lua_pushstring(L, "flags");
+                lua_pushnumber(L, fish->flags);
+                lua_settable(L, -3);
+
+                lua_settable(L, -3);
+            }
+        }
+        return 1;
+    }
+
+    int PushMobList(lua_State* L, std::vector<fishmob_t>* MobList) {
+        lua_newtable(L);
+        int counter = 0;
+        if (MobList != nullptr) {
+            for (std::vector<fishmob_t>::iterator mob = MobList->begin(); mob != MobList->end(); ++mob) {
+                lua_pushnumber(L, ++counter);
+                lua_newtable(L);
+                lua_pushstring(L, "id");
+                lua_pushnumber(L, mob->mobId);
+                lua_settable(L, -3);
+                lua_pushstring(L, "name");
+                lua_pushstring(L, mob->mobName.c_str());
+                lua_settable(L, -3);
+                lua_pushstring(L, "level");
+                lua_pushnumber(L, mob->level);
+                lua_settable(L, -3);
+                lua_pushstring(L, "size");
+                lua_pushnumber(L, mob->size);
+                lua_settable(L, -3);
+                lua_pushstring(L, "baseDelay");
+                lua_pushnumber(L, mob->baseDelay);
+                lua_settable(L, -3);
+                lua_pushstring(L, "baseMove");
+                lua_pushnumber(L, mob->baseMove);
+                lua_settable(L, -3);
+                lua_pushstring(L, "log");
+                lua_pushnumber(L, mob->log);
+                lua_settable(L, -3);
+                lua_pushstring(L, "quest");
+                lua_pushnumber(L, mob->quest);
+                lua_settable(L, -3);
+                lua_pushstring(L, "nm");
+                lua_pushboolean(L, mob->nm);
+                lua_settable(L, -3);
+                lua_pushstring(L, "nmFlags");
+                lua_pushnumber(L, mob->nmFlags);
+                lua_settable(L, -3);
+                lua_pushstring(L, "rarity");
+                lua_pushnumber(L, mob->rarity);
+                lua_settable(L, -3);
+                lua_pushstring(L, "minRespawn");
+                lua_pushnumber(L, mob->minRespawn);
+                lua_settable(L, -3);
+                lua_pushstring(L, "reqKeyItem");
+                lua_pushnumber(L, mob->reqKeyItem);
+                lua_settable(L, -3);
+                lua_pushstring(L, "reqLure");
+                lua_pushnumber(L, mob->reqLureId);
+                lua_settable(L, -3);
+                lua_pushstring(L, "areaId");
+                lua_pushnumber(L, mob->areaId);
+                lua_settable(L, -3);
+
+                lua_settable(L, -3);
+            }
+        }
+        return 1;
+    }
+
+    int PushRodInfo(lua_State* L, fishingrod_t* Rod) {
+        lua_newtable(L);
+        lua_pushstring(L, "id");
+        lua_pushnumber(L, Rod->rodId);
+        lua_settable(L, -3);
+        lua_pushstring(L, "name");
+        lua_pushstring(L, Rod->rodName.c_str());
+        lua_settable(L, -3);
+        lua_pushstring(L, "material");
+        lua_pushnumber(L, Rod->material);
+        lua_settable(L, -3);
+        lua_pushstring(L, "sizeType");
+        lua_pushnumber(L, Rod->sizeType);
+        lua_settable(L, -3);
+        lua_pushstring(L, "flags");
+        lua_pushnumber(L, Rod->flags);
+        lua_settable(L, -3);
+        lua_pushstring(L, "durability");
+        lua_pushnumber(L, Rod->durability);
+        lua_settable(L, -3);
+        lua_pushstring(L, "fishattack");
+        lua_pushnumber(L, Rod->fishAttack);
+        lua_settable(L, -3);
+        lua_pushstring(L, "lgdbonusatk");
+        lua_pushnumber(L, Rod->lgdBonusAtk);
+        lua_settable(L, -3);
+        lua_pushstring(L, "missregen");
+        lua_pushnumber(L, Rod->missRegen);
+        lua_settable(L, -3);
+        lua_pushstring(L, "lgdmissregen");
+        lua_pushnumber(L, Rod->lgdMissRegen);
+        lua_settable(L, -3);
+        lua_pushstring(L, "fishtime");
+        lua_pushnumber(L, Rod->fishTime);
+        lua_settable(L, -3);
+        lua_pushstring(L, "lgdbonustime");
+        lua_pushnumber(L, Rod->lgdBonusTime);
+        lua_settable(L, -3);
+        lua_pushstring(L, "smdelaybonus");
+        lua_pushnumber(L, Rod->smDelayBonus);
+        lua_settable(L, -3);
+        lua_pushstring(L, "smmovebonus");
+        lua_pushnumber(L, Rod->smMoveBonus);
+        lua_settable(L, -3);
+        lua_pushstring(L, "lgdelaybonus");
+        lua_pushnumber(L, Rod->lgDelayBonus);
+        lua_settable(L, -3);
+        lua_pushstring(L, "lgmovebonus");
+        lua_pushnumber(L, Rod->lgMoveBonus);
+        lua_settable(L, -3);
+        lua_pushstring(L, "multiplier");
+        lua_pushnumber(L, Rod->multiplier);
+        lua_settable(L, -3);
+        lua_pushstring(L, "breakable");
+        lua_pushnumber(L, Rod->breakable);
+        lua_settable(L, -3);
+        lua_pushstring(L, "brokenrodid");
+        lua_pushnumber(L, Rod->brokenRodId);
+        lua_settable(L, -3);
+        lua_pushstring(L, "mmm");
+        lua_pushnumber(L, Rod->isMMM);
+        lua_settable(L, -3);
+        return 1;
+    }
+
+    int PushLureInfo(lua_State* L, fishinglure_t* Lure) {
+        lua_newtable(L);
+        lua_pushstring(L, "id");
+        lua_pushnumber(L, Lure->lureId);
+        lua_settable(L, -3);
+        lua_pushstring(L, "name");
+        lua_pushstring(L, Lure->lureName.c_str());
+        lua_settable(L, -3);
+        lua_pushstring(L, "type");
+        lua_pushnumber(L, Lure->luretype);
+        lua_settable(L, -3);
+        lua_pushstring(L, "flags");
+        lua_pushnumber(L, Lure->flags);
+        lua_settable(L, -3);
+        lua_pushstring(L, "maxhook");
+        lua_pushnumber(L, Lure->maxhook);
+        lua_settable(L, -3);
+        lua_pushstring(L, "losable");
+        lua_pushboolean(L, Lure->losable);
+        lua_settable(L, -3);
+        return 1;
+    }
+
+    fishresponse_t* OnFishingCheck(CCharEntity* PChar, fishingrod_t* Rod, std::vector<fish_t>* FishList, std::vector<fishmob_t>* MobList, uint8 AreaID, string_t AreaName, fishinglure_t* Lure, uint8 Difficulty)
+    {
+        fishresponse_t* retVal = new fishresponse_t();
+        retVal->caught = false;
+        lua_prepscript("scripts/globals/fishing/fishing.lua");
+
+
+        if (prepFile(File, "onFishingCheck"))
+        {
+            return retVal;
+        }
+        CLuaBaseEntity LuaBaseEntity(PChar);
+        Lunar<CLuaBaseEntity>::push(LuaHandle, &LuaBaseEntity);
+        lua_pushinteger(LuaHandle, PChar->RealSkills.skill[SKILL_FISHING]);
+        PushRodInfo(LuaHandle, Rod);
+        PushFishList(LuaHandle, FishList);
+        PushMobList(LuaHandle, MobList);
+        PushLureInfo(LuaHandle, Lure);
+        lua_pushinteger(LuaHandle, AreaID);
+        lua_pushstring(LuaHandle, AreaName.c_str());
+        lua_pushinteger(LuaHandle, zoneutils::GetZone(PChar->getZone())->GetType());
+        lua_pushinteger(LuaHandle, Difficulty);
+        lua_pushinteger(LuaHandle, PChar->fishingToken);
+
+        if (lua_pcall(LuaHandle, 11, 26, 0))
+        {
+            ShowError("luautils::OnFishingCheck: %s\n", lua_tostring(LuaHandle, -1));
+            lua_pop(LuaHandle, 1);
+            retVal->successtype = FISHINGSUCCESSTYPE_NONE;
+            return retVal;
+        }
+
+        retVal->areaid = AreaID;
+        retVal->fishingToken = (uint32)lua_tonumber(LuaHandle, -26);
+        retVal->caught = (uint32)lua_toboolean(LuaHandle, -25);
+        retVal->catchid = (uint32)lua_tonumber(LuaHandle, -24);
+        retVal->catchtype = (uint32)lua_tonumber(LuaHandle, -23);
+        retVal->catchlevel = (uint32)lua_tonumber(LuaHandle, -22);
+        retVal->catchsize = (uint32)lua_tonumber(LuaHandle, -21);
+        retVal->count = (uint32)lua_tonumber(LuaHandle, -20);
+        retVal->stamina = (uint32)lua_tonumber(LuaHandle, -19);
+        retVal->delay = (uint32)lua_tonumber(LuaHandle, -18);
+        retVal->regen = (uint32)lua_tonumber(LuaHandle, -17);
+        retVal->response = (uint32)lua_tonumber(LuaHandle, -16);
+        retVal->attackdmg = (uint32)lua_tonumber(LuaHandle, -15);
+        retVal->heal = (uint32)lua_tonumber(LuaHandle, -14);
+        retVal->timelimit = (uint32)lua_tonumber(LuaHandle, -13);
+        retVal->sense = (uint32)lua_tonumber(LuaHandle, -12);
+        retVal->hooksense = (uint32)lua_tonumber(LuaHandle, -11);
+        retVal->special = (uint32)lua_tonumber(LuaHandle, -10);
+        retVal->length = (uint32)lua_tonumber(LuaHandle, -9);
+        retVal->weight = (uint32)lua_tonumber(LuaHandle, -8);
+        retVal->loseChance = (uint32)lua_tonumber(LuaHandle, -7);
+        retVal->breakChance = (uint32)lua_tonumber(LuaHandle, -6);
+        retVal->snapChance = (uint32)lua_tonumber(LuaHandle, -5);
+        retVal->catchsizeType = (uint32)lua_tonumber(LuaHandle, -4);
+        retVal->legendary = (bool)lua_toboolean(LuaHandle, -3) == true ? 1 : 0;
+        retVal->nm = (bool)lua_toboolean(LuaHandle, -2) == true ? 1 : 0;
+        retVal->nmFlags = (uint32)lua_tonumber(LuaHandle, -1);
+        int n = lua_gettop(LuaHandle);
+        lua_pop(LuaHandle, n);
+
+        return retVal;
+    }
+
+    catchresponse_t* OnFishingReelIn(CCharEntity* PChar, fishresponse_t* response, fishingrod_t* rod)
+    {
+        catchresponse_t* retVal = new catchresponse_t();
+        retVal->caught = false;
+        lua_prepscript("scripts/globals/fishing/fishing.lua");
+
+        if (prepFile(File, "onFishingReelIn"))
+        {
+            return retVal;
+        }
+        CLuaBaseEntity LuaBaseEntity(PChar);
+        Lunar<CLuaBaseEntity>::push(LuaHandle, &LuaBaseEntity);
+        lua_pushinteger(LuaHandle, response->catchtype);
+        lua_pushinteger(LuaHandle, PChar->RealSkills.skill[SKILL_FISHING]);
+        lua_pushinteger(LuaHandle, response->catchlevel);
+        lua_pushinteger(LuaHandle, response->loseChance);
+        lua_pushinteger(LuaHandle, response->breakChance);
+        lua_pushinteger(LuaHandle, response->snapChance);
+        lua_pushinteger(LuaHandle, rod->sizeType);
+        lua_pushinteger(LuaHandle, response->catchsizeType);
+        lua_pushinteger(LuaHandle, response->legendary);
+        lua_pushinteger(LuaHandle, rod->breakable);
+        lua_pushinteger(LuaHandle, rod->durability);
+        lua_pushinteger(LuaHandle, response->catchsize);
+        lua_pushboolean(LuaHandle, response->nm);
+        lua_pushinteger(LuaHandle, response->catchid);
+        lua_pushinteger(LuaHandle, response->nmFlags);
+        lua_pushinteger(LuaHandle, response->fishingToken);
+
+        if (lua_pcall(LuaHandle, 17, 5, 0))
+        {
+            ShowError("luautils::OnFishingReelIn: %s\n", lua_tostring(LuaHandle, -1));
+            lua_pop(LuaHandle, 1);
+            retVal->caught = false;
+            retVal->failReason = FISHINGFAILTYPE_SYSTEM;
+            return retVal;
+        }
+
+        retVal->fishingToken = (uint32)lua_tonumber(LuaHandle, -5);
+        retVal->caught = (uint32)lua_toboolean(LuaHandle, -4);
+        retVal->rodbreak = (uint32)lua_toboolean(LuaHandle, -3);
+        retVal->linebreak = (uint32)lua_toboolean(LuaHandle, -2);
+        retVal->failReason = (uint32)lua_tonumber(LuaHandle, -1);
+
+        int n = lua_gettop(LuaHandle);
+        lua_pop(LuaHandle, n);
+
+        return retVal;
+    }
+
+    /********************************************************************
+        onFishingAction - callback when fishing action happens
+    *********************************************************************/
+    int32 OnFishingAction(CCharEntity* PChar, int32 Action, int32 Stamina, int32 Special)
+    {
+        lua_prepscript("scripts/zones/%s/Zone.lua", PChar->loc.zone->GetName());
+
+        if (prepFile(File, "onFishingAction"))
+        {
+            return -1;
+        }
+        CLuaBaseEntity LuaBaseEntity(PChar);
+        Lunar<CLuaBaseEntity>::push(LuaHandle, &LuaBaseEntity);
+
+        lua_pushinteger(LuaHandle, Action);
+        lua_pushinteger(LuaHandle, Stamina);
+        lua_pushinteger(LuaHandle, Special);
+
+        if (lua_pcall(LuaHandle, 4, 0, 0))
+        {
+            ShowError("luautils::onFishingAction: %s\n", lua_tostring(LuaHandle, -1));
+            lua_pop(LuaHandle, 1);
+            return -1;
+        }
+
+        return 0;
+    }
+
+    /********************************************************************
+        onFishingCatch - callback when you catch fish
+    *********************************************************************/
+    int32 OnFishingCatch(CCharEntity* PChar, uint8 CatchType, int32 CatchID)
+    {
+        lua_prepscript("scripts/zones/%s/Zone.lua", PChar->loc.zone->GetName());
+
+        if (prepFile(File, "onFishingCatch"))
+        {
+            return -1;
+        }
+        CLuaBaseEntity LuaBaseEntity(PChar);
+        Lunar<CLuaBaseEntity>::push(LuaHandle, &LuaBaseEntity);
+
+        lua_pushinteger(LuaHandle, CatchType);
+        lua_pushinteger(LuaHandle, CatchID);
+
+        if (lua_pcall(LuaHandle, 3, 0, 0))
+        {
+            ShowError("luautils::onFishingCatch: %s\n", lua_tostring(LuaHandle, -1));
+            lua_pop(LuaHandle, 1);
+            return -1;
+        }
+
+        return 0;
+    }
+
+    /********************************************************************
+        onFishingEnd - callback when fishing has ended
+    *********************************************************************/
+    int32 OnFishingEnd(CCharEntity* PChar)
+    {
+        lua_prepscript("scripts/zones/%s/Zone.lua", PChar->loc.zone->GetName());
+
+        if (prepFile(File, "onFishingCatch"))
+        {
+            return -1;
+        }
+        CLuaBaseEntity LuaBaseEntity(PChar);
+        Lunar<CLuaBaseEntity>::push(LuaHandle, &LuaBaseEntity);
+
+        if (lua_pcall(LuaHandle, 1, 0, 0))
+        {
+            ShowError("luautils::onFishingEnd: %s\n", lua_tostring(LuaHandle, -1));
+            lua_pop(LuaHandle, 1);
+            return -1;
+        }
+
+        return 0;
     }
 
 }; // namespace luautils

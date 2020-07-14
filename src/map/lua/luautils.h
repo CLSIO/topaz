@@ -28,6 +28,7 @@
 #include "../../common/taskmgr.h"
 #include "../items/item_equipment.h"
 #include "../spell.h"
+#include "../utils/fishingutils.h"
 #include "lua_ability.h"
 #include "lua_baseentity.h"
 #include "lua_mobskill.h"
@@ -71,6 +72,7 @@ struct actionList_t;
 struct actionTarget_t;
 
 enum ConquestUpdate : uint8;
+enum class Emote : uint8;
 
 namespace luautils
 {
@@ -252,7 +254,7 @@ namespace luautils
 
     int32 OnAbilityCheck(CBaseEntity* PChar, CBaseEntity* PTarget, CAbility* PAbility, CBaseEntity** PMsgTarget);   // triggers when a player attempts to use a job ability or roll
     int32 OnPetAbility(CBaseEntity* PPet, CBaseEntity* PMob, CMobSkill* PMobSkill, CBaseEntity* PPetMaster, action_t* action);      // triggers when pet uses an ability
-    std::tuple<int32, uint8, uint8> OnUseWeaponSkill(CCharEntity* PChar, CBaseEntity* PMob, CWeaponSkill* wskill, uint16 tp, bool primary, action_t& action, CBattleEntity* taChar);// returns: damage, tphits landed, extra hits landed
+    std::tuple<int32, uint8, uint8> OnUseWeaponSkill(CBattleEntity* PUser, CBaseEntity* PMob, CWeaponSkill* wskill, uint16 tp, bool primary, action_t& action, CBattleEntity* taChar);// returns: damage, tphits landed, extra hits landed
     int32 OnUseAbility(CBattleEntity* PUser, CBattleEntity* PTarget, CAbility* PAbility, action_t* action);         // triggers when job ability is used
 
     int32 OnInstanceZoneIn(CCharEntity* PChar, CInstance* PInstance);           // triggered on zone in to instance
@@ -287,6 +289,22 @@ namespace luautils
 
     void OnFurniturePlaced(CCharEntity* PChar, CItemFurnishing* itemId);
     void OnFurnitureRemoved(CCharEntity* PChar, CItemFurnishing* itemId);
+
+    void OnPlayerEmote(CCharEntity* PChar, Emote EmoteID);
+
+    int32 SelectDailyItem(lua_State* L);
+	
+	
+    int32 OnFishingStart(CCharEntity* PChar, int32 RodID, int32 BaitID, int32 AreaID);                            // triggers when player starts fishing in a zone
+    fishresponse_t* OnFishingCheck(CCharEntity* PChar, fishingrod_t* Rod, std::vector<fish_t>* FishList,
+        std::vector<fishmob_t>* MobList, uint8 AreaID, string_t AreaName, fishinglure_t* Lure, uint8 Difficulty); // fishing process hook check
+
+    catchresponse_t* OnFishingReelIn(CCharEntity* PChar, fishresponse_t* response, fishingrod_t* rod);            // triggers when player reels in the fish
+    int32 OnFishingAction(CCharEntity* PChar, int32 Action, int32 Stamina, int32 Special);                        // triggers when fishing action happens to player
+    int32 OnFishingCatch(CCharEntity* PChar, uint8 CatchType, int32 CatchID);                                     // triggers when player catches fish
+    int32 OnFishingEnd(CCharEntity* PChar);                                                                       // triggers when player stops fishing
+
+
 };
 
 #endif //- _LUAUTILS_H -

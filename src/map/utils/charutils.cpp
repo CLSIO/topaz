@@ -1593,6 +1593,7 @@ namespace charutils
                 {
                     CheckUnarmedWeapon(PChar);
                 }
+                PChar->m_dualWield = false;
             }
             PChar->delEquipModifiers(&((CItemEquipment*)PItem)->modList, ((CItemEquipment*)PItem)->getReqLvl(), equipSlotID);
             PChar->PLatentEffectContainer->DelLatentEffects(((CItemEquipment*)PItem)->getReqLvl(), equipSlotID);
@@ -1862,6 +1863,7 @@ namespace charutils
                                     return false;
                                 }
                                 PChar->m_Weapons[SLOT_SUB] = (CItemWeapon*)PItem;
+                                PChar->m_dualWield = true;
                             }
                             break;
                             default:
@@ -3266,14 +3268,15 @@ namespace charutils
             }
         });
         pcinzone = std::max(pcinzone, PMob->m_HiPartySize);
+        maxlevel = std::max(maxlevel, PMob->m_HiPCLvl);
+        PMob->m_HiPartySize = pcinzone;
+        PMob->m_HiPCLvl = maxlevel;
 
         PChar->ForAlliance([&PMob, &region, &minlevel, &maxlevel, &pcinzone](CBattleEntity* PPartyMember)
         {
             CCharEntity* PMember = dynamic_cast<CCharEntity*>(PPartyMember);
             if (!PMember || PMember->isDead())
                 return;
-
-            maxlevel = std::max(maxlevel, PMob->m_HiPCLvl);
 
             bool chainactive = false;
 
@@ -5052,4 +5055,31 @@ namespace charutils
         return 0;
     }
 
+    void AddVar(CCharEntity* PChar, const char* var, int32 value)
+    {
+        if (PChar == nullptr)
+            return;
+        const char* Query = "INSERT INTO char_vars SET charid = %u, varname = '%s', value = %i ON DUPLICATE KEY UPDATE value = value + %i;";
+
+        Sql_Query(SqlHandle, Query,
+            PChar->id,
+            var,
+            value,
+            value);
+    }
+
+    void SetVar(CCharEntity* PChar, const char* var, int32 value)
+    {
+        if (PChar == nullptr)
+            return;
+
+        if (value == 0)
+        {
+            Sql_Query(SqlHandle, "DELETE FROM char_vars WHERE charid = %u AND varname = '%s' LIMIT 1;", PChar->id, var);
+        }
+        else
+        {
+            Sql_Query(SqlHandle, "INSERT INTO char_vars SET charid = %u, varname = '%s', value = %i ON DUPLICATE KEY UPDATE value = %i;", PChar->id, var, value, value);
+        }
+    }
 }; // namespace charutils
