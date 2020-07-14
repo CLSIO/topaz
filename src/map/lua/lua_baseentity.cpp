@@ -276,6 +276,68 @@ inline int32 CLuaBaseEntity::messageText(lua_State* L)
     return 0;
 }
 
+
+/************************************************************************
+*  Function: AddLinkpearl
+*  Purpose : Returns linkperal to character, used for new players
+*  Example : player:AddLSpearl("you_linkshell_name");
+*  Notes   : Phynix_Custom
+************************************************************************/
+
+inline int32 CLuaBaseEntity::addLinkpearl(lua_State* L)
+{
+    TPZ_DEBUG_BREAK_IF(m_PBaseEntity->objtype == TYPE_NPC);
+
+    std::string linkshellName = lua_tostring(L, 1);
+    const char* Query = "SELECT name FROM linkshells WHERE name='%s'";
+    char* lsName = const_cast<char*>(linkshellName.c_str());
+    Sql_EscapeString(SqlHandle, lsName, lsName);
+    int32 ret = Sql_Query(SqlHandle, Query, lsName);
+
+    if (ret != SQL_ERROR && Sql_NumRows(SqlHandle) != 0 && Sql_NextRow(SqlHandle) == SQL_SUCCESS)
+    {
+        CCharEntity* PChar = (CCharEntity*)m_PBaseEntity;
+
+        std::string qStr = ("UPDATE char_inventory SET signature='");
+        qStr += lsName;
+        qStr += "' WHERE charid = " + std::to_string(PChar->id);
+        qStr += " AND itemId = 515 AND signature = ''";
+        Sql_Query(SqlHandle, qStr.c_str());
+
+        Query = "SELECT linkshellid,color FROM linkshells WHERE name='%s'";
+        ret = Sql_Query(SqlHandle, Query, lsName);
+        if (ret != SQL_ERROR && Sql_NumRows(SqlHandle) != 0 && Sql_NextRow(SqlHandle) == SQL_SUCCESS)
+        {
+            CItem* PItem = itemutils::GetItem(515);
+
+            // Update item with name & color //
+            int8 EncodedString[16];
+            EncodeStringLinkshell((int8*)lsName, EncodedString);
+            PItem->setSignature(EncodedString);
+            ((CItemLinkshell*)PItem)->SetLSID(Sql_GetUIntData(SqlHandle, 0));
+            ((CItemLinkshell*)PItem)->SetLSColor(Sql_GetIntData(SqlHandle, 1));
+            charutils::AddItem(PChar, LOC_INVENTORY, PItem, 1);
+            // To force equip, UN comment the rest of this!
+            // uint8 invSlotID = PItem->getSlotID();
+            // linkshell::AddOnlineMember(PChar, PItem, PItem->GetLSID());
+            // PItem->setSubType(ITEM_LOCKED);
+            // PChar->equip[SLOT_LINK1] = invSlotID;
+            // PChar->equipLoc[SLOT_LINK1] = LOC_INVENTORY;
+            // PChar->pushPacket(new CInventoryAssignPacket(PItem, INV_LINKSHELL));
+            // charutils::SaveCharEquip(PChar);
+            // PChar->pushPacket(new CLinkshellEquipPacket(PChar, PItem->GetLSID()));
+            // PChar->pushPacket(new CInventoryItemPacket(PItem, LOC_INVENTORY, PItem->getSlotID()));
+            // PChar->pushPacket(new CInventoryFinishPacket());
+            // charutils::LoadInventory(PChar);
+
+            lua_pushboolean(L, true);
+            return 1;
+        }
+    }
+    lua_pushboolean(L, false);
+    return 1;
+}
+
 /************************************************************************
 *  Function: PrintToPlayer()
 *  Purpose : Displays either standad messages to a PC or custom text
@@ -15202,6 +15264,10 @@ Lunar<CLuaBaseEntity>::Register_t CLuaBaseEntity::methods[] =
     LUNAR_DECLARE_METHOD(CLuaBaseEntity,getTHlevel),
     LUNAR_DECLARE_METHOD(CLuaBaseEntity,getPlayerRegionInZone),
     LUNAR_DECLARE_METHOD(CLuaBaseEntity,updateToEntireZone),
+
+        //Phynix Custom
+	LUNAR_DECLARE_METHOD(CLuaBaseEntity,addLinkpearl),
+
 
     {nullptr,nullptr}
 };

@@ -841,6 +841,7 @@ int32 lobby_createchar_save(uint32 accid, uint32 charid, char_mini* createchar)
         return -1;
     }
 
+
     Query = "INSERT INTO char_look(charid,face,race,size) VALUES(%u,%u,%u,%u);";
 
     if (Sql_Query(SqlHandle, Query, charid, createchar->m_look.face, createchar->m_look.race, createchar->m_look.size) == SQL_ERROR)
@@ -891,6 +892,37 @@ int32 lobby_createchar_save(uint32 accid, uint32 charid, char_mini* createchar)
 
     Query = "INSERT INTO char_inventory(charid) VALUES(%u);";
     if (Sql_Query(SqlHandle, Query, charid, createchar->m_mjob) == SQL_ERROR) return -1;
+
+
+    // add linkshell
+
+    Query = "INSERT INTO char_inventory(charid,location,slot,itemid,signature,extra) VALUES(%u,7,1,515,'PHYNIX',0x0100000000001FF000AA2CE88F2F00000000000000000000);";
+
+    if (Sql_Query(SqlHandle, Query, charid) == SQL_ERROR)
+    {
+        ShowDebug(CL_WHITE"lobby_ccsave" CL_RESET": char<" CL_WHITE"%s" CL_RESET">, accid: %u, charid: %u\n", createchar->m_name, accid, charid);
+        return -1;
+    }
+    
+    switch (createchar->m_nation)
+    {
+    case 0x02: // windy start
+       
+        Query = "INSERT INTO char_inventory(charid,location,slot,itemid,signature,extra) VALUES(%u,7,2,515,'Windurst',0x180000000000F2FA03C493845524D4FC0000000000000000);";
+
+        if (Sql_Query(SqlHandle, Query, charid) == SQL_ERROR)
+        {
+            ShowDebug(CL_WHITE"lobby_ccsave" CL_RESET": char<" CL_WHITE"%s" CL_RESET">, accid: %u, charid: %u\n", createchar->m_name, accid, charid);
+            return -1;
+        }
+        break;
+    case 0x01: // bastok start
+        
+        break;
+    case 0x00: // sandy start
+        
+        break;
+    }
 
     return 0;
 }

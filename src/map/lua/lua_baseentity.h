@@ -194,6 +194,8 @@ public:
     int32 getCurrentGPItem(lua_State*);      // Gets current GP item id and max points
     int32 breakLinkshell(lua_State*);        // Breaks all pearls/sacks
 
+
+
     // Trading
     int32 getContainerSize(lua_State*);      // Gets the current capacity of a container
     int32 changeContainerSize(lua_State*);   // Increase/Decreases container size
@@ -704,6 +706,12 @@ public:
     int32 getDespoilDebuff(lua_State*);     // gets the status effect id to apply to the mob on successful despoil
     int32 itemStolen(lua_State*);           // sets mob's ItemStolen var = true
     int32 getTHlevel(lua_State*);           // Returns the Monster's current Treasure Hunter Tier
+
+
+    // Phynix Custom
+    int32 addLinkpearl(lua_State* L);
+
+
 };
 
 #endif
