@@ -80,6 +80,8 @@
 #include "../ai/states/magic_state.h"
 #include <optional>
 #include "../battlefield.h"
+#include "../daily_system.h"
+#include "../packets/char_emotion.h"
 
 namespace luautils
 {
@@ -150,6 +152,7 @@ namespace luautils
 
         lua_register(LuaHandle, "getAbility", luautils::getAbility);
         lua_register(LuaHandle, "getSpell", luautils::getSpell);
+        lua_register(LuaHandle, "SelectDailyItem", luautils::SelectDailyItem);
 
         Lunar<CLuaAbility>::Register(LuaHandle);
         Lunar<CLuaAction>::Register(LuaHandle);
@@ -186,9 +189,13 @@ namespace luautils
 
     int32 free()
     {
-        ShowStatus(CL_WHITE"luautils::free" CL_RESET":lua free...");
-        lua_close(LuaHandle);
-        ShowMessage("\t - " CL_GREEN"[OK]" CL_RESET"\n");
+        if(LuaHandle)
+        {
+            ShowStatus(CL_WHITE"luautils::free" CL_RESET":lua free...");
+            lua_close(LuaHandle);
+            LuaHandle = nullptr;
+            ShowMessage("\t - " CL_GREEN"[OK]" CL_RESET"\n");
+        }
         return 0;
     }
 
@@ -702,8 +709,8 @@ namespace luautils
         if (!lua_isnil(L, 1) && lua_isnumber(L, 1))
         {
             int32 offset = (int32)lua_tointeger(L, 1);
-
-            CVanaTime::getInstance()->setCustomOffset(offset);
+            int32 custom = CVanaTime::getInstance()->getCustomEpoch();
+            CVanaTime::getInstance()->setCustomEpoch((custom ? custom : VTIME_BASEDATE) - offset);
 
             lua_pushboolean(L, true);
             return 1;
@@ -1497,8 +1504,7 @@ namespace luautils
 
     int32 OnEventUpdate(CCharEntity* PChar, uint16 eventID, uint32 result, uint16 extras)
     {
-        int32 oldtop = lua_gettop(LuaHandle);
-
+        lua_gettop(LuaHandle);
         lua_pushnil(LuaHandle);
         lua_setglobal(LuaHandle, "onEventUpdate");
 
@@ -2887,9 +2893,21 @@ namespace luautils
         else
         {
             int8 File[255];
-            memset(File, 0, sizeof(File));
-            PMob->objtype == TYPE_PET ? snprintf((char*)File, sizeof(File), "scripts/globals/pets/%s.lua", static_cast<CPetEntity*>(PMob)->GetScriptName().c_str()) :
-                snprintf((char*)File, sizeof(File), "scripts/zones/%s/mobs/%s.lua", PMob->loc.zone->GetName(), PMob->GetName());;
+            switch (PMob->objtype)
+            {
+            case TYPE_MOB:
+                snprintf((char*)File, sizeof(File), "scripts/zones/%s/mobs/%s.lua", PMob->loc.zone->GetName(), PMob->GetName());
+                break;
+            case TYPE_PET:
+                snprintf((char*)File, sizeof(File), "scripts/globals/pets/%s.lua", static_cast<CPetEntity*>(PMob)->GetScriptName().c_str());
+                break;
+            case TYPE_TRUST:
+                snprintf((char*)File, sizeof(File), "scripts/globals/spells/trust/%s.lua", PMob->GetName());
+                break;
+            default:
+                ShowWarning("luautils::onMobDeath (%d): unknown objtype\n", PMob->objtype);
+                break;
+            }
 
             lua_pushnil(LuaHandle);
             lua_setglobal(LuaHandle, "onMobDeath");
@@ -2937,8 +2955,22 @@ namespace luautils
         TPZ_DEBUG_BREAK_IF(PMob == nullptr);
 
         int8 File[255];
-        PMob->objtype == TYPE_PET ? snprintf((char*)File, sizeof(File), "scripts/globals/pets/%s.lua", static_cast<CPetEntity*>(PMob)->GetScriptName().c_str()) :
+        switch (PMob->objtype)
+        {
+        case TYPE_MOB:
             snprintf((char*)File, sizeof(File), "scripts/zones/%s/mobs/%s.lua", PMob->loc.zone->GetName(), PMob->GetName());
+            break;
+        case TYPE_PET:
+            snprintf((char*)File, sizeof(File), "scripts/globals/pets/%s.lua", static_cast<CPetEntity*>(PMob)->GetScriptName().c_str());
+            break;
+        case TYPE_TRUST:
+            snprintf((char*)File, sizeof(File), "scripts/globals/spells/trust/%s.lua", PMob->GetName());
+            break;
+        default:
+            ShowWarning("luautils::onMobSpawn (%d): unknown objtype\n", PMob->objtype);
+            break;
+        }
+
         if (prepFile(File, "onMobSpawn"))
         {
             return -1;
@@ -2946,7 +2978,6 @@ namespace luautils
 
         CLuaBaseEntity LuaMobEntity(PMob);
         Lunar<CLuaBaseEntity>::push(LuaHandle, &LuaMobEntity);
-
 
         if (lua_pcall(LuaHandle, 1, 0, 0))
         {
@@ -3024,8 +3055,21 @@ namespace luautils
         TPZ_DEBUG_BREAK_IF(PMob == nullptr);
 
         int8 File[255];
-        PMob->objtype == TYPE_PET ? snprintf((char*)File, sizeof(File), "scripts/globals/pets/%s.lua", static_cast<CPetEntity*>(PMob)->GetScriptName().c_str()) :
+        switch (PMob->objtype)
+        {
+        case TYPE_MOB:
             snprintf((char*)File, sizeof(File), "scripts/zones/%s/mobs/%s.lua", PMob->loc.zone->GetName(), PMob->GetName());
+            break;
+        case TYPE_PET:
+            snprintf((char*)File, sizeof(File), "scripts/globals/pets/%s.lua", static_cast<CPetEntity*>(PMob)->GetScriptName().c_str());
+            break;
+        case TYPE_TRUST:
+            snprintf((char*)File, sizeof(File), "scripts/globals/spells/trust/%s.lua", PMob->GetName());
+            break;
+        default:
+            ShowWarning("luautils::onMobDespawn (%d): unknown objtype\n", PMob->objtype);
+            break;
+        }
 
         if (prepFile(File, "onMobDespawn"))
         {
@@ -3144,7 +3188,7 @@ namespace luautils
     *                                                                       *
     ************************************************************************/
 
-    std::tuple<int32, uint8, uint8> OnUseWeaponSkill(CCharEntity* PChar, CBaseEntity* PMob, CWeaponSkill* wskill, uint16 tp, bool primary, action_t& action, CBattleEntity* taChar)
+    std::tuple<int32, uint8, uint8> OnUseWeaponSkill(CBattleEntity* PChar, CBaseEntity* PMob, CWeaponSkill* wskill, uint16 tp, bool primary, action_t& action, CBattleEntity* taChar)
     {
         lua_prepscript("scripts/globals/weaponskills/%s.lua", wskill->getName());
 
@@ -4500,7 +4544,38 @@ namespace luautils
         }
     }
 
-    /********************************************************************
+    int32 SelectDailyItem(lua_State* L)
+    {
+        TPZ_DEBUG_BREAK_IF(lua_isnil(L, 1) || !lua_isuserdata(L, 1));
+        TPZ_DEBUG_BREAK_IF(lua_isnil(L, 2) || !lua_isnumber(L, 2));
+        CLuaBaseEntity* PLuaBaseEntity = Lunar<CLuaBaseEntity>::check(L, 1);
+        CCharEntity* player = (CCharEntity*)PLuaBaseEntity->GetBaseEntity();
+        lua_pushinteger(L, daily::SelectItem(player, (uint8)lua_tointeger(L, 2)));
+        return 1;
+    }
+
+    void OnPlayerEmote(CCharEntity* PChar, Emote EmoteID)
+    {
+        lua_prepscript("scripts/globals/player.lua");
+
+        if (prepFile(File, "onPlayerEmote"))
+            return;
+
+        CLuaBaseEntity LuaBaseEntity(PChar);
+        Lunar<CLuaBaseEntity>::push(LuaHandle, &LuaBaseEntity);
+
+        lua_pushinteger(LuaHandle, (uint8)EmoteID);
+
+        if (lua_pcall(LuaHandle, 2, 0, 0))
+        {
+            ShowError("luautils::onEmote: %s\n", lua_tostring(LuaHandle, -1));
+            lua_pop(LuaHandle, 1);
+            return;
+        }
+    }
+	
+	
+	    /********************************************************************
         onFishingStart - callback when you start fishing
     *********************************************************************/
     int32 OnFishingStart(CCharEntity * PChar, int32 RodID, int32 BaitID, int32 AreaID)
@@ -4952,4 +5027,5 @@ namespace luautils
 
         return 0;
     }
+
 }; // namespace luautils
