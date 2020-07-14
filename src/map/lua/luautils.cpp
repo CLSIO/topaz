@@ -81,6 +81,7 @@
 #include <optional>
 #include "../battlefield.h"
 #include "../daily_system.h"
+#include "../packets/char_emotion.h"
 
 namespace luautils
 {
@@ -188,9 +189,13 @@ namespace luautils
 
     int32 free()
     {
-        ShowStatus(CL_WHITE"luautils::free" CL_RESET":lua free...");
-        lua_close(LuaHandle);
-        ShowMessage("\t - " CL_GREEN"[OK]" CL_RESET"\n");
+        if(LuaHandle)
+        {
+            ShowStatus(CL_WHITE"luautils::free" CL_RESET":lua free...");
+            lua_close(LuaHandle);
+            LuaHandle = nullptr;
+            ShowMessage("\t - " CL_GREEN"[OK]" CL_RESET"\n");
+        }
         return 0;
     }
 
@@ -340,8 +345,8 @@ namespace luautils
 
             if (!lua_isnil(L, 2) && lua_isuserdata(L, 2))
             {
-                CLuaBaseEntity* PLuaBaseEntity = Lunar<CLuaBaseEntity>::check(L, 2);
-                PInstance = PLuaBaseEntity->GetBaseEntity()->PInstance;
+                CLuaInstance* PLuaInstance = Lunar<CLuaInstance>::check(L, 2);
+                PInstance = PLuaInstance->GetInstance();
             }
 
             CBaseEntity* PNpc = nullptr;
@@ -396,7 +401,7 @@ namespace luautils
             }
             if (PInstance)
             {
-                PInstance->GetEntity(mobid & 0xFFF, TYPE_MOB | TYPE_PET);
+                PMob = PInstance->GetEntity(mobid & 0xFFF, TYPE_MOB | TYPE_PET);
             }
             else
             {
@@ -704,8 +709,8 @@ namespace luautils
         if (!lua_isnil(L, 1) && lua_isnumber(L, 1))
         {
             int32 offset = (int32)lua_tointeger(L, 1);
-
-            CVanaTime::getInstance()->setCustomOffset(offset);
+            int32 custom = CVanaTime::getInstance()->getCustomEpoch();
+            CVanaTime::getInstance()->setCustomEpoch((custom ? custom : VTIME_BASEDATE) - offset);
 
             lua_pushboolean(L, true);
             return 1;
@@ -1499,8 +1504,7 @@ namespace luautils
 
     int32 OnEventUpdate(CCharEntity* PChar, uint16 eventID, uint32 result, uint16 extras)
     {
-        int32 oldtop = lua_gettop(LuaHandle);
-
+        lua_gettop(LuaHandle);
         lua_pushnil(LuaHandle);
         lua_setglobal(LuaHandle, "onEventUpdate");
 
@@ -2692,7 +2696,7 @@ namespace luautils
 
         lua_prepscript("scripts/zones/%s/mobs/%s.lua", PMob->loc.zone->GetName(), PMob->GetName());
 
-        if (PTarget->objtype != TYPE_PET && PTarget->objtype != TYPE_MOB)
+        if (PTarget->objtype == TYPE_PC)
         {
             ((CCharEntity*)PTarget)->m_event.reset();
             ((CCharEntity*)PTarget)->m_event.Target = PMob;
@@ -2900,6 +2904,9 @@ namespace luautils
             case TYPE_TRUST:
                 snprintf((char*)File, sizeof(File), "scripts/globals/spells/trust/%s.lua", PMob->GetName());
                 break;
+            default:
+                ShowWarning("luautils::onMobDeath (%d): unknown objtype\n", PMob->objtype);
+                break;
             }
 
             lua_pushnil(LuaHandle);
@@ -2958,6 +2965,9 @@ namespace luautils
             break;
         case TYPE_TRUST:
             snprintf((char*)File, sizeof(File), "scripts/globals/spells/trust/%s.lua", PMob->GetName());
+            break;
+        default:
+            ShowWarning("luautils::onMobSpawn (%d): unknown objtype\n", PMob->objtype);
             break;
         }
 
@@ -3055,6 +3065,9 @@ namespace luautils
             break;
         case TYPE_TRUST:
             snprintf((char*)File, sizeof(File), "scripts/globals/spells/trust/%s.lua", PMob->GetName());
+            break;
+        default:
+            ShowWarning("luautils::onMobDespawn (%d): unknown objtype\n", PMob->objtype);
             break;
         }
 
@@ -3175,7 +3188,7 @@ namespace luautils
     *                                                                       *
     ************************************************************************/
 
-    std::tuple<int32, uint8, uint8> OnUseWeaponSkill(CCharEntity* PChar, CBaseEntity* PMob, CWeaponSkill* wskill, uint16 tp, bool primary, action_t& action, CBattleEntity* taChar)
+    std::tuple<int32, uint8, uint8> OnUseWeaponSkill(CBattleEntity* PChar, CBaseEntity* PMob, CWeaponSkill* wskill, uint16 tp, bool primary, action_t& action, CBattleEntity* taChar)
     {
         lua_prepscript("scripts/globals/weaponskills/%s.lua", wskill->getName());
 
@@ -4539,6 +4552,26 @@ namespace luautils
         CCharEntity* player = (CCharEntity*)PLuaBaseEntity->GetBaseEntity();
         lua_pushinteger(L, daily::SelectItem(player, (uint8)lua_tointeger(L, 2)));
         return 1;
+    }
+
+    void OnPlayerEmote(CCharEntity* PChar, Emote EmoteID)
+    {
+        lua_prepscript("scripts/globals/player.lua");
+
+        if (prepFile(File, "onPlayerEmote"))
+            return;
+
+        CLuaBaseEntity LuaBaseEntity(PChar);
+        Lunar<CLuaBaseEntity>::push(LuaHandle, &LuaBaseEntity);
+
+        lua_pushinteger(LuaHandle, (uint8)EmoteID);
+
+        if (lua_pcall(LuaHandle, 2, 0, 0))
+        {
+            ShowError("luautils::onEmote: %s\n", lua_tostring(LuaHandle, -1));
+            lua_pop(LuaHandle, 1);
+            return;
+        }
     }
 
 }; // namespace luautils

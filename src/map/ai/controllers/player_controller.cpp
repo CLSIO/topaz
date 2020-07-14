@@ -1,4 +1,4 @@
-/*
+﻿/*
 ===========================================================================
 
 Copyright (c) 2010-2015 Darkstar Dev Teams
@@ -204,6 +204,11 @@ bool CPlayerController::WeaponSkill(uint16 targid, uint16 wsid)
         PChar->pushPacket(new CMessageBasicPacket(PChar, PChar, 0, 0, MSGBASIC_UNABLE_TO_USE_WS));
     }
     return false;
+}
+
+time_point CPlayerController::getLastAttackTime()
+{
+    return m_LastAttackTime;
 }
 
 void CPlayerController::setLastAttackTime(time_point _LastAttackTime)

@@ -1,4 +1,4 @@
-/*
+﻿/*
 ===========================================================================
 
 Copyright (c) 2018 Darkstar Dev Teams
@@ -20,7 +20,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/
 */
 
 #include "trust_controller.h"
+#include "player_controller.h"
 
+#include "../../ability.h"
 #include "../ai_container.h"
 #include "../../status_effect_container.h"
 #include "../../enmity_container.h"
@@ -34,7 +36,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/
 
 CTrustController::CTrustController(CCharEntity* PChar, CTrustEntity* PTrust) : CMobController(PTrust)
 {
-    m_GambitsContainer = std::make_unique<CGambitsContainer>(PTrust);
+    m_GambitsContainer = std::make_unique<gambits::CGambitsContainer>(PTrust);
 }
 
 CTrustController::~CTrustController()
@@ -150,7 +152,9 @@ void CTrustController::DoCombatTick(time_point tick)
 void CTrustController::DoRoamTick(time_point tick)
 {
     auto PMaster = static_cast<CCharEntity*>(POwner->PMaster);
-    bool trustEngageCondition = (PMaster->GetBattleTarget() && PMaster->GetBattleTarget()->PLastAttacker == PMaster);
+    auto masterLastAttackTime = static_cast<CPlayerController*>(PMaster->PAI->GetController())->getLastAttackTime();
+    bool masterMeleeSwing = masterLastAttackTime > server_clock::now() - 1s;
+    bool trustEngageCondition = PMaster->GetBattleTarget() && masterMeleeSwing;
 
     if (PMaster->PAI->IsEngaged() && trustEngageCondition)
     {
@@ -209,10 +213,16 @@ void CTrustController::DoRoamTick(time_point tick)
 
 bool CTrustController::Ability(uint16 targid, uint16 abilityid)
 {
+    if (static_cast<CMobEntity*>(POwner)->PRecastContainer->HasRecast(RECAST_ABILITY, abilityid + 16, 0))
+    {
+        return false;
+    }
+
     if (POwner->PAI->CanChangeState())
     {
         return POwner->PAI->Internal_Ability(targid, abilityid);
     }
+
     return false;
 }
 

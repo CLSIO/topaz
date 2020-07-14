@@ -1,4 +1,4 @@
-/*
+﻿/*
 ===========================================================================
 
   Copyright (c) 2010-2015 Darkstar Dev Teams
@@ -44,6 +44,7 @@ public:
     virtual bool RangedAttack(uint16 targid);
     virtual bool UseItem(uint16 targid, uint8 loc, uint8 slotid);
 
+    time_point getLastAttackTime();
     void setLastAttackTime(time_point);
     void setLastErrMsgTime(time_point);
     time_point getLastErrMsgTime();

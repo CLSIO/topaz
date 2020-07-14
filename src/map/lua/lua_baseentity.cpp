@@ -106,6 +106,7 @@
 #include "../packets/change_music.h"
 #include "../packets/conquest_map.h"
 #include "../packets/entity_animation.h"
+#include "../packets/entity_enable_list.h"
 #include "../packets/entity_update.h"
 #include "../packets/entity_visual.h"
 #include "../packets/event.h"
@@ -114,6 +115,7 @@
 #include "../packets/event_update_string.h"
 #include "../packets/guild_menu.h"
 #include "../packets/guild_menu_buy.h"
+#include "../packets/independant_animation.h"
 #include "../packets/instance_entry.h"
 #include "../packets/inventory_finish.h"
 #include "../packets/inventory_modify.h"
@@ -128,6 +130,7 @@
 #include "../packets/message_standard.h"
 #include "../packets/message_system.h"
 #include "../packets/message_text.h"
+#include "../packets/timer_bar_util.h"
 #include "../packets/position.h"
 #include "../packets/quest_mission_log.h"
 #include "../packets/release.h"
@@ -9625,6 +9628,104 @@ inline int32 CLuaBaseEntity::sendTractor(lua_State *L)
 }
 
 /************************************************************************
+*  Function: countdown()
+*  Purpose : Starts or clears a visible countdown bar for player
+*  Example : player:countdown(60)
+*  Notes   : Using 0 or no argument removes the countdown bar from the player
+************************************************************************/
+int32 CLuaBaseEntity::countdown(lua_State* L)
+{
+    TPZ_DEBUG_BREAK_IF(m_PBaseEntity == nullptr);
+    TPZ_DEBUG_BREAK_IF(m_PBaseEntity->objtype != TYPE_PC);
+
+    auto seconds = static_cast<uint32>(lua_tonumber(L, 1));
+    CCharEntity* PChar = (CCharEntity*)m_PBaseEntity;
+    auto packet = new CTimerBarUtilPacket(PChar);
+
+    if (seconds)
+    {
+        packet->addCountdown(seconds);
+    }
+
+    if (lua_isstring(L, 2) && lua_isnumber(L, 3))
+    {
+        packet->addBar1(lua_tostring(L, 2), (uint8)lua_tonumber(L, 3));
+    }
+
+    if (lua_isstring(L, 4) && lua_isnumber(L, 5))
+    {
+        packet->addBar2(lua_tostring(L, 4), (uint8)lua_tonumber(L, 5));
+    }
+
+    PChar->pushPacket(packet);
+
+    return 0;
+}
+
+/************************************************************************
+*  Function: enableEntities()
+*  Purpose : Enables/disables the list of given special hidden entities for just the target char
+*  Example : player:enableEntities({ 17207972, 17207973})
+*  Notes   : Default is all off, so sending the ID enables the special entity
+************************************************************************/
+int32 CLuaBaseEntity::enableEntities(lua_State* L)
+{
+    TPZ_DEBUG_BREAK_IF(m_PBaseEntity == nullptr);
+    TPZ_DEBUG_BREAK_IF(m_PBaseEntity->objtype != TYPE_PC);
+
+    CCharEntity* PChar = (CCharEntity*)m_PBaseEntity;
+    std::vector<uint32> data;
+
+    if (lua_istable(L, 1))
+    {
+        lua_pushnil(L);
+        while (lua_next(L, -2))
+        {
+            lua_pushvalue(L, -2);
+            auto value = (uint32)lua_tonumber(L, -2);
+            data.push_back(value);
+            lua_pop(L, 2);
+        }
+    }
+
+    PChar->pushPacket(new CEntityEnableList(data));
+
+    return 0;
+}
+
+/************************************************************************
+*  Function: independantAnimation()
+*  Purpose : Play an animation independant of action messages
+*  Example : player:independantAnimation(player, 251, 4) -- Plays little hearts
+*  Notes   : Accepts a target, but works perfectly fine on self
+************************************************************************/
+int32 CLuaBaseEntity::independantAnimation(lua_State* L)
+{
+    TPZ_DEBUG_BREAK_IF(m_PBaseEntity == nullptr);
+    TPZ_DEBUG_BREAK_IF(m_PBaseEntity->objtype != TYPE_PC);
+
+    CCharEntity* PChar = (CCharEntity*)m_PBaseEntity;
+
+    CBaseEntity* PTarget;
+    if (!lua_isnil(L, 1) && lua_isuserdata(L, 1))
+    {
+        CLuaBaseEntity* PLuaBaseEntity = Lunar<CLuaBaseEntity>::check(L, 1);
+        PTarget = PLuaBaseEntity->m_PBaseEntity;
+    }
+    else
+    {
+        PTarget = m_PBaseEntity;
+    }
+
+    auto animId = (uint16)lua_tointeger(L, 2);
+    auto mode = (uint8)lua_tointeger(L, 3);
+
+    PChar->pushPacket(new CIndependantAnimationPacket(PChar, PTarget, animId, mode));
+
+    return 0;
+}
+
+/************************************************************************
 *  Function: engage()
 *  Purpose : Instructs a Battle Entity to engage in combat
 *  Example : pet:engage(target)
@@ -10091,6 +10192,30 @@ int32 CLuaBaseEntity::checkImbuedItems(lua_State* L)
 }
 
 /************************************************************************
+*  Function: isDualWielding()
+*  Purpose : Returns true if entity is wielding two weapons
+*  Example : if player:isDualWielding() then
+*  Notes   : 
+************************************************************************/
+
+inline int32 CLuaBaseEntity::isDualWielding(lua_State* L)
+{
+    TPZ_DEBUG_BREAK_IF(m_PBaseEntity == nullptr);
+    CBattleEntity* PBattleEntity = dynamic_cast<CBattleEntity*>(m_PBaseEntity);
+    if (PBattleEntity)
+    {
+        lua_pushboolean(L, PBattleEntity->m_dualWield);
+        return 1;
+    }
+    else
+    {
+        lua_pushboolean(L, false);
+        ShowError("lua::isDualWielding :: NPCs don't wield weapons!\n");
+        return 1;
+    }
+}
+
+/************************************************************************
 *  Function: getCE()
 *  Purpose : Returns the current Cumulative Enmity a Mob has against an Entity
 *  Example : local playerCE = target:getCE(player)
@@ -10436,10 +10561,17 @@ inline int32 CLuaBaseEntity::resetEnmity(lua_State *L)
 inline int32 CLuaBaseEntity::updateClaim(lua_State *L)
 {
     TPZ_DEBUG_BREAK_IF(m_PBaseEntity == NULL);
-    TPZ_DEBUG_BREAK_IF(m_PBaseEntity->objtype != TYPE_MOB);
+    if (m_PBaseEntity->objtype != TYPE_MOB)
+    {
+        return 0;
+    }
 
-    //TPZ_DEBUG_BREAK_IF(lua_gettop(L) > 1);
-    TPZ_DEBUG_BREAK_IF(lua_isnil(L, 1) || !lua_isuserdata(L, 1));
+    if (lua_isnil(L, 1) || !lua_isuserdata(L, 1))
+    {
+        static_cast<CMobEntity*>(m_PBaseEntity)->m_OwnerID.clean();
+        static_cast<CMobEntity*>(m_PBaseEntity)->updatemask |= UPDATE_STATUS;
+        return 0;
+    }
 
     CLuaBaseEntity* PEntity = Lunar<CLuaBaseEntity>::check(L, 1);
 
@@ -12176,6 +12308,24 @@ inline int32 CLuaBaseEntity::spawnTrust(lua_State *L)
 }
 
 /************************************************************************
+*  Function: clearTrusts()
+*  Purpose :
+*  Example : caster:clearTrusts()
+*  Notes   :
+************************************************************************/
+
+inline int32 CLuaBaseEntity::clearTrusts(lua_State* L)
+{
+    TPZ_DEBUG_BREAK_IF(m_PBaseEntity == nullptr);
+    TPZ_DEBUG_BREAK_IF(m_PBaseEntity->objtype != TYPE_PC); // only PCs can spawn trusts
+
+    static_cast<CCharEntity*>(m_PBaseEntity)->ClearTrusts();
+
+    return 0;
+}
+
+
+/************************************************************************
 *  Function: getTrustID()
 *  Purpose :
 *  Example : trust:getTrustID()
@@ -12192,13 +12342,13 @@ inline int32 CLuaBaseEntity::getTrustID(lua_State* L)
 }
 
 /************************************************************************
-*  Function: addGambit()
+*  Function: addSimpleGambit()
 *  Purpose :
-*  Example : mob:addGambit(PARTY, HPP_LTE, 25, MA, SELECT_HIGHEST, tpz.magic.spellFamily.CURE)
+*  Example : trust:addSimpleGambit(target, condition, condition_arg, reaction, selector, selector_arg)
 *  Notes   : Adds a behaviour to the gambit system
 ************************************************************************/
 
-inline int32 CLuaBaseEntity::addGambit(lua_State* L)
+inline int32 CLuaBaseEntity::addSimpleGambit(lua_State* L)
 {
     TPZ_DEBUG_BREAK_IF(m_PBaseEntity == nullptr);
     TPZ_DEBUG_BREAK_IF(m_PBaseEntity->objtype != TYPE_TRUST);
@@ -12209,24 +12359,114 @@ inline int32 CLuaBaseEntity::addGambit(lua_State* L)
     TPZ_DEBUG_BREAK_IF(lua_isnil(L, 4) || !lua_isnumber(L, 4));
     TPZ_DEBUG_BREAK_IF(lua_isnil(L, 5) || !lua_isnumber(L, 5));
     TPZ_DEBUG_BREAK_IF(lua_isnil(L, 6) || !lua_isnumber(L, 6));
-    // 7 is optional
 
-    auto selector = static_cast<G_SELECTOR>(lua_tointeger(L, 1));
-    auto trigger = static_cast<G_TRIGGER>(lua_tointeger(L, 2));
-    auto trigger_condition = static_cast<uint16>(lua_tointeger(L, 3));
+    using namespace gambits;
+
+    auto target = static_cast<G_TARGET>(lua_tointeger(L, 1));
+    auto condition = static_cast<G_CONDITION>(lua_tointeger(L, 2));
+    auto condition_arg = static_cast<uint16>(lua_tointeger(L, 3));
+
     auto reaction = static_cast<G_REACTION>(lua_tointeger(L, 4));
-    auto reaction_mod = static_cast<G_REACTION_MODIFIER>(lua_tointeger(L, 5));
-    auto reaction_arg = static_cast<uint16>(lua_tointeger(L, 6));
+    auto selector = static_cast<G_SELECT>(lua_tointeger(L, 5));
+    auto selector_arg = static_cast<uint16>(lua_tointeger(L, 6));
+
+    // Optional
     auto retry_delay = 0;
     if (!lua_isnil(L, 7) && lua_isnumber(L, 7))
     {
         retry_delay = (uint16)lua_tointeger(L, 7);
     }
 
+    Gambit_t g{ { target, condition, condition_arg }, { reaction, selector, selector_arg } };
+    g.retry_delay = retry_delay;
+
     auto trust = static_cast<CTrustEntity*>(m_PBaseEntity);
     auto controller = static_cast<CTrustController*>(trust->PAI->GetController());
 
-    controller->m_GambitsContainer->AddGambit(selector, trigger, trigger_condition, reaction, reaction_mod, reaction_arg, retry_delay);
+    controller->m_GambitsContainer->AddGambit(g);
+
+    return 0;
+}
+
+/************************************************************************
+*  Function: addFullGambit()
+*  Purpose :
+*  Example : mob:addGambit(...)
+*  Notes   : Adds a behaviour to the gambit system
+************************************************************************/
+
+inline void build_gambit(lua_State* L, std::vector<int>& nums, int index, int depth = 0)
+{
+    lua_pushvalue(L, index);
+    lua_pushnil(L);
+    while (lua_next(L, -2))
+    {
+        lua_pushvalue(L, -2);
+
+        auto key = lua_tostring(L, -1);
+        auto value = lua_tostring(L, -2);
+        auto type = lua_type(L, -2);
+        auto type_name = lua_typename(L, type);
+
+        printf("(depth: %d, type: %s) %s => %s\n", depth, type_name, key, value);
+
+        // TODO: This is bad.
+        if (depth == 3)
+        {
+            nums.push_back((int)lua_tonumber(L, -2));
+        }
+
+        if (lua_istable(L, -2))
+        {
+            build_gambit(L, nums, -2, ++depth);
+        }
+        else
+        {
+            // TODO: Hack to keep depth constant for numbers
+            ++depth;
+        }
+
+        --depth;
+        lua_pop(L, 2);
+    }
+    lua_pop(L, 1);
+    --depth;
+}
+
+inline int32 CLuaBaseEntity::addFullGambit(lua_State* L)
+{
+    TPZ_DEBUG_BREAK_IF(m_PBaseEntity == nullptr);
+    TPZ_DEBUG_BREAK_IF(m_PBaseEntity->objtype != TYPE_TRUST);
+    TPZ_DEBUG_BREAK_IF(lua_isnil(L, 1) || !lua_istable(L, 1));
+
+    using namespace gambits;
+
+    std::vector<int> nums;
+    build_gambit(L, nums, 1);
+
+    TPZ_DEBUG_BREAK_IF(nums.size() != 6);
+
+    if (nums.size() != 6)
+    {
+        ShowWarning("Invalid Gambit");
+        return 0;
+    }
+
+    // TODO: don't hardcode this...
+    auto target = static_cast<G_TARGET>(nums[0]);
+    auto condition = static_cast<G_CONDITION>(nums[1]);
+    auto condition_arg = static_cast<uint16>(nums[2]);
+
+    auto reaction = static_cast<G_REACTION>(nums[3]);
+    auto selector = static_cast<G_SELECT>(nums[4]);
+    auto selector_arg = static_cast<uint16>(nums[5]);
+
+    Gambit_t g{ { target, condition, condition_arg }, { reaction, selector, selector_arg } };
+
+    auto trust = static_cast<CTrustEntity*>(m_PBaseEntity);
+    auto controller = static_cast<CTrustController*>(trust->PAI->GetController());
+
+    controller->m_GambitsContainer->AddGambit(g);
 
     return 0;
 }
@@ -14717,6 +14957,10 @@ Lunar<CLuaBaseEntity>::Register_t CLuaBaseEntity::methods[] =
     LUNAR_DECLARE_METHOD(CLuaBaseEntity,sendReraise),
     LUNAR_DECLARE_METHOD(CLuaBaseEntity,sendTractor),
 
+    LUNAR_DECLARE_METHOD(CLuaBaseEntity,countdown),
+    LUNAR_DECLARE_METHOD(CLuaBaseEntity,enableEntities),
+    LUNAR_DECLARE_METHOD(CLuaBaseEntity,independantAnimation),
+
     LUNAR_DECLARE_METHOD(CLuaBaseEntity,engage),
     LUNAR_DECLARE_METHOD(CLuaBaseEntity,isEngaged),
     LUNAR_DECLARE_METHOD(CLuaBaseEntity,disengage),
@@ -14739,6 +14983,8 @@ Lunar<CLuaBaseEntity>::Register_t CLuaBaseEntity::methods[] =
 
     LUNAR_DECLARE_METHOD(CLuaBaseEntity,recalculateStats),
     LUNAR_DECLARE_METHOD(CLuaBaseEntity,checkImbuedItems),
+
+    LUNAR_DECLARE_METHOD(CLuaBaseEntity,isDualWielding),
 
     // Enmity
     LUNAR_DECLARE_METHOD(CLuaBaseEntity,getCE),
@@ -14876,8 +15122,10 @@ Lunar<CLuaBaseEntity>::Register_t CLuaBaseEntity::methods[] =
 
     // Trust related
     LUNAR_DECLARE_METHOD(CLuaBaseEntity,spawnTrust),
+    LUNAR_DECLARE_METHOD(CLuaBaseEntity,clearTrusts),
     LUNAR_DECLARE_METHOD(CLuaBaseEntity,getTrustID),
-    LUNAR_DECLARE_METHOD(CLuaBaseEntity,addGambit),
+    LUNAR_DECLARE_METHOD(CLuaBaseEntity,addSimpleGambit),
+    LUNAR_DECLARE_METHOD(CLuaBaseEntity,addFullGambit),
 
     // Mob Entity-Specific
     LUNAR_DECLARE_METHOD(CLuaBaseEntity,setMobLevel),

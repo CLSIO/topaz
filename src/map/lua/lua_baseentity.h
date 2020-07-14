@@ -464,6 +464,10 @@ public:
     int32 sendReraise(lua_State*);            // send raise request to char
     int32 sendTractor(lua_State*);            // send tractor request to char
 
+    int32 countdown(lua_State* L);
+    int32 enableEntities(lua_State* L);
+    int32 independantAnimation(lua_State* L);
+
     int32 engage(lua_State* L);
     int32 isEngaged(lua_State* L);
     int32 disengage(lua_State* L);
@@ -486,6 +490,8 @@ public:
 
     int32 recalculateStats(lua_State* L);
     int32 checkImbuedItems(lua_State* L);
+
+    int32 isDualWielding(lua_State*);          // Checks if the battle entity is dual wielding
 
     // Enmity
     int32 getCE(lua_State*);                   //gets current CE the mob has towards the player
@@ -586,8 +592,10 @@ public:
     int32 despawnPet(lua_State*);            // Despawns Pet
 
     int32 spawnTrust(lua_State*);            // Spawns trust
+    int32 clearTrusts(lua_State*);
     int32 getTrustID(lua_State*);
-    int32 addGambit(lua_State*);
+    int32 addSimpleGambit(lua_State*);
+    int32 addFullGambit(lua_State*);
 
     int32 isJugPet(lua_State*);              // If the entity has a pet, test if it is a jug pet.
     int32 hasValidJugPetItem(lua_State*);

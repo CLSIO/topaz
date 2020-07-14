@@ -1,4 +1,4 @@
-/*
+﻿/*
 ===========================================================================
 
 Copyright (c) 2010-2015 Darkstar Dev Teams
@@ -165,6 +165,8 @@ void PrintPacket(CBasicPacket data)
 
     for (size_t y = 0; y < data.length(); y++)
     {
+        // TODO: -Wno-restrict - undefined behavior to print and write src into dest
+        // TODO: -Wno-format-overflow - writing between 4 and 53 bytes into destination of 50
         sprintf(message, "%s %02hx", message, *((uint8*)data[(const int)y]));
         if (((y + 1) % 16) == 0)
         {
@@ -1269,9 +1271,32 @@ void SmallPacket0x034(map_session_data_t* session, CCharEntity* PChar, CBasicPac
             // If item count is zero.. remove from container..
             if (quantity > 0)
             {
-                ShowNotice(CL_CYAN"%s->%s trade updating trade slot id %d with item %s, quantity %d\n" CL_RESET, PChar->GetName(), PTarget->GetName(), tradeSlotID, PItem->getName(), quantity);
-                PItem->setReserve(quantity + PItem->getReserve());
-                PChar->UContainer->SetItem(tradeSlotID, PItem);
+                if (PItem->isType(ITEM_LINKSHELL))
+                {
+                    CItemLinkshell* PItemLinkshell = static_cast<CItemLinkshell*>(PItem);
+                    CItemLinkshell* PItemLinkshell1 = (CItemLinkshell*)PChar->getEquip(SLOT_LINK1);
+                    CItemLinkshell* PItemLinkshell2 = (CItemLinkshell*)PChar->getEquip(SLOT_LINK2);
+                    if ( (!PItemLinkshell1 && !PItemLinkshell2) ||
+                        ((!PItemLinkshell1 || PItemLinkshell1->GetLSID() != PItemLinkshell->GetLSID()) &&
+                        (!PItemLinkshell2 || PItemLinkshell2->GetLSID() != PItemLinkshell->GetLSID())) )
+                    {
+                        PChar->pushPacket(new CMessageStandardPacket(MsgStd::LinkshellEquipBeforeUsing));
+                        PItem->setReserve(0);
+                        PChar->UContainer->SetItem(tradeSlotID, nullptr);
+                    }
+                    else
+                    {
+                        ShowNotice(CL_CYAN"%s->%s trade updating trade slot id %d with item %s, quantity %d\n" CL_RESET, PChar->GetName(), PTarget->GetName(), tradeSlotID, PItem->getName(), quantity);
+                        PItem->setReserve(quantity + PItem->getReserve());
+                        PChar->UContainer->SetItem(tradeSlotID, PItem);
+                    }
+                }
+                else
+                {
+                    ShowNotice(CL_CYAN"%s->%s trade updating trade slot id %d with item %s, quantity %d\n" CL_RESET, PChar->GetName(), PTarget->GetName(), tradeSlotID, PItem->getName(), quantity);
+                    PItem->setReserve(quantity + PItem->getReserve());
+                    PChar->UContainer->SetItem(tradeSlotID, PItem);
+                }
             }
             else
             {
@@ -1594,6 +1619,13 @@ void SmallPacket0x04D(map_session_data_t* session, CCharEntity* PChar, CBasicPac
     {
         return;
     }
+
+    if (!zoneutils::IsResidentialArea(PChar) && PChar->m_GMlevel == 0 && !PChar->loc.zone->CanUseMisc(MISC_AH) && !PChar->loc.zone->CanUseMisc(MISC_MOGMENU))
+    {
+        ShowDebug(CL_CYAN"%s is trying to use the delivery box in a disallowed zone [%s]\n" CL_RESET, PChar->GetName(), PChar->loc.zone->GetName());
+        return;
+    }
+
 
     // 0x01 - Send old items..
     // 0x02 - Add items to be sent..
@@ -2245,7 +2277,7 @@ void SmallPacket0x04E(map_session_data_t* session, CCharEntity* PChar, CBasicPac
     // 0x0A - Retrieve List of Items Sold By Player
     // 0x0B - Proof Of Purchase
     // 0x0E - Purchasing Items
-    // 0x0С - Cancel Sale
+    // 0x0C - Cancel Sale
     // 0x0D - Update Sale List By Player
 
     switch (action)
@@ -2520,10 +2552,12 @@ void SmallPacket0x050(map_session_data_t* session, CCharEntity* PChar, CBasicPac
     uint8 containerID = data.ref<uint8>(0x06);     // container id
 
     if (containerID != LOC_INVENTORY && containerID != LOC_WARDROBE && containerID != LOC_WARDROBE2 && containerID != LOC_WARDROBE3 && containerID != LOC_WARDROBE4)
+    {
         if (equipSlotID != 16 && equipSlotID != 17)
             return;
         else if (containerID != LOC_MOGSATCHEL && containerID != LOC_MOGSACK && containerID != LOC_MOGCASE)
             return;
+    }
 
     charutils::EquipItem(PChar, slotID, equipSlotID, containerID); //current
     charutils::SaveCharEquip(PChar);
@@ -2712,9 +2746,9 @@ void SmallPacket0x05A(map_session_data_t* session, CCharEntity* PChar, CBasicPac
 
 void SmallPacket0x05B(map_session_data_t* session, CCharEntity* PChar, CBasicPacket data)
 {
-    auto CharID = data.ref<uint32>(0x04);
+    //auto CharID = data.ref<uint32>(0x04);
     auto Result = data.ref<uint32>(0x08);
-    auto ZoneID = data.ref<uint16>(0x10);
+    //auto ZoneID = data.ref<uint16>(0x10);
     auto EventID = data.ref<uint16>(0x12);
 
     PrintPacket(data);
@@ -2749,9 +2783,9 @@ void SmallPacket0x05B(map_session_data_t* session, CCharEntity* PChar, CBasicPac
 
 void SmallPacket0x05C(map_session_data_t* session, CCharEntity* PChar, CBasicPacket data)
 {
-    auto CharID = data.ref<uint32>(0x10);
+    //auto CharID = data.ref<uint32>(0x10);
     auto Result = data.ref<uint32>(0x14);
-    auto ZoneID = data.ref<uint16>(0x18);
+    //auto ZoneID = data.ref<uint16>(0x18);
 
     auto EventID = data.ref<uint16>(0x1A);
 
@@ -2809,19 +2843,27 @@ void SmallPacket0x05D(map_session_data_t* session, CCharEntity* PChar, CBasicPac
 
     // Invalid Emote ID.
     if (EmoteID < Emote::POINT || EmoteID > Emote::JOB)
+    {
         return;
+    }
 
     // Invalid Emote Mode.
     if (emoteMode < EmoteMode::ALL || emoteMode > EmoteMode::MOTION)
+    {
         return;
+    }
 
     const auto extra = data.ref<uint16>(0x0C);
 
     // Attempting to use locked job emote.
     if (EmoteID == Emote::JOB && extra && !(PChar->jobs.unlocked & (1 << (extra - 0x1E))))
+    {
         return;
-
+    }
+    
     PChar->loc.zone->PushPacket(PChar, CHAR_INRANGE_SELF, new CCharEmotionPacket(PChar, TargetID, TargetIndex, EmoteID, emoteMode, extra));
+
+    luautils::OnPlayerEmote(PChar, EmoteID);
 }
 
 /************************************************************************
@@ -4438,12 +4480,12 @@ void SmallPacket0x0C4(map_session_data_t* session, CCharEntity* PChar, CBasicPac
                     Sql_Query(SqlHandle, Query, extra, PChar->id, PItemLinkshell->getLocationID(), PItemLinkshell->getSlotID());
                     PChar->pushPacket(new CInventoryItemPacket(PItemLinkshell, PItemLinkshell->getLocationID(), PItemLinkshell->getSlotID()));
                     PChar->pushPacket(new CInventoryFinishPacket());
-                    PChar->pushPacket(new CMessageSystemPacket(0, 0, 110)); // That linkshell group no longer exists. This item is unusable.
+                    PChar->pushPacket(new CMessageStandardPacket(MsgStd::LinkshellNoLongerExists));
                     return;
                 }
                 if (PItemLinkshell->GetLSID() == 0)
                 {
-                    PChar->pushPacket(new CMessageSystemPacket(0, 0, 110)); // That linkshell group no longer exists. This item is unusable.
+                    PChar->pushPacket(new CMessageStandardPacket(MsgStd::LinkshellNoLongerExists));
                     return;
                 }
                 if (OldLinkshell != nullptr) // switching linkshell group
@@ -4955,7 +4997,7 @@ void SmallPacket0x0E2(map_session_data_t* session, CCharEntity* PChar, CBasicPac
         break;
         }
     }
-    PChar->pushPacket(new CMessageSystemPacket(0, 0, 158)); // You do not have access to those linkshell commands.
+    PChar->pushPacket(new CMessageStandardPacket(MsgStd::LinkshellNoAccess));
     return;
 }
 

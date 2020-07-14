@@ -167,7 +167,7 @@ void BuildTrust(uint32 TrustID)
                 FROM spell_list, mob_pools, mob_family_system WHERE spell_list.spellid = %u \
                 AND (spell_list.spellid+5000) = mob_pools.poolid AND mob_pools.familyid = mob_family_system.familyid ORDER BY spell_list.spellid";
 
-    uint32 ret = Sql_Query(SqlHandle, Query, TrustID);
+    auto ret = Sql_Query(SqlHandle, Query, TrustID);
 
     if (ret != SQL_ERROR && Sql_NumRows(SqlHandle) != 0)
     {
@@ -250,6 +250,17 @@ void SpawnTrust(CCharEntity* PMaster, uint32 TrustID)
     CTrustEntity* PTrust = LoadTrust(PMaster, TrustID);
     PMaster->PTrusts.insert(PMaster->PTrusts.end(), PTrust);
     PMaster->StatusEffectContainer->CopyConfrontationEffect(PTrust);
+    
+    if (PMaster->PBattlefield)
+    {
+        PTrust->PBattlefield = PMaster->PBattlefield;
+    }
+
+    if (PMaster->PInstance)
+    {
+        PTrust->PInstance = PMaster->PInstance;
+    }
+
     PMaster->loc.zone->InsertTRUST(PTrust);
     PTrust->Spawn();
 
@@ -322,7 +333,7 @@ void LoadTrustStatsAndSkills(CTrustEntity* PTrust)
     float growth = 1.06f;
     float base   = 18.0f;
 
-    PTrust->health.maxhp = (int16)(base * pow(mLvl, growth) * PTrust->HPscale);
+    PTrust->health.maxhp = static_cast<uint16>(base * pow(mLvl, growth) * PTrust->HPscale * map_config.alter_ego_hp_multiplier);
 
     bool hasMp = false;
     switch (mJob)
@@ -359,7 +370,7 @@ void LoadTrustStatsAndSkills(CTrustEntity* PTrust)
 
     if (hasMp)
     {
-        PTrust->health.maxmp = (int16)(base * pow(mLvl, growth) * PTrust->MPscale);
+        PTrust->health.maxmp = static_cast<uint16>(base * pow(mLvl, growth) * PTrust->MPscale * map_config.alter_ego_mp_multiplier);
     }
 
     PTrust->health.tp = 0;
@@ -367,7 +378,39 @@ void LoadTrustStatsAndSkills(CTrustEntity* PTrust)
     PTrust->health.hp = PTrust->GetMaxHP();
     PTrust->health.mp = PTrust->GetMaxMP();
 
-    ((CItemWeapon*)PTrust->m_Weapons[SLOT_MAIN])->setDamage(mobutils::GetWeaponDamage(PTrust));
+    // TODO: Set damage and delay based on job/sjob
+    // Base damage is based on mob calculations and is far too high, scale down here and fine tune below.
+    auto baseDamage = mobutils::GetWeaponDamage(PTrust) * 0.5;
+    float damage_mod = 1.0f;
+    switch (mJob)
+    {
+        // TODO: Check all jobs
+
+        // Assuming the job is using its "default" weapon type, otherwise adjust damage with mods.
+        // FAST WEAPONS
+        case JOB_MNK:
+        case JOB_THF:
+        case JOB_NIN:
+        case JOB_PUP:
+            { damage_mod = 0.60f; break; }
+        // SLOW WEAPONS
+        case JOB_WAR:
+        case JOB_DRK:
+        case JOB_SAM:
+        case JOB_DRG:
+        case JOB_RUN:
+            { damage_mod = 1.50f; break; }
+        // NORMAL WEAPONS
+        default: { damage_mod = 1.0f; break; }
+    }
+
+    ((CItemWeapon*)PTrust->m_Weapons[SLOT_MAIN])->setDamage((uint16)(baseDamage * damage_mod));
+
+    // Reduce weapon delay of MNK
+    if (PTrust->GetMJob() == JOB_MNK)
+    {
+        ((CItemWeapon*)PTrust->m_Weapons[SLOT_MAIN])->resetDelay();
+    }
 
     uint16 fSTR = mobutils::GetBaseToRank(PTrust->strRank, mLvl);
     uint16 fDEX = mobutils::GetBaseToRank(PTrust->dexRank, mLvl);
@@ -414,13 +457,13 @@ void LoadTrustStatsAndSkills(CTrustEntity* PTrust)
         sVIT = 0;
     }
 
-    PTrust->stats.STR = fSTR + mSTR + sSTR;
-    PTrust->stats.DEX = fDEX + mDEX + sDEX;
-    PTrust->stats.VIT = fVIT + mVIT + sVIT;
-    PTrust->stats.AGI = fAGI + mAGI + sAGI;
-    PTrust->stats.INT = fINT + mINT + sINT;
-    PTrust->stats.MND = fMND + mMND + sMND;
-    PTrust->stats.CHR = fCHR + mCHR + sCHR;
+    PTrust->stats.STR = static_cast<uint16>((fSTR + mSTR + sSTR) * map_config.alter_ego_stat_multiplier);
+    PTrust->stats.DEX = static_cast<uint16>((fDEX + mDEX + sDEX) * map_config.alter_ego_stat_multiplier);
+    PTrust->stats.VIT = static_cast<uint16>((fVIT + mVIT + sVIT) * map_config.alter_ego_stat_multiplier);
+    PTrust->stats.AGI = static_cast<uint16>((fAGI + mAGI + sAGI) * map_config.alter_ego_stat_multiplier);
+    PTrust->stats.INT = static_cast<uint16>((fINT + mINT + sINT) * map_config.alter_ego_stat_multiplier);
+    PTrust->stats.MND = static_cast<uint16>((fMND + mMND + sMND) * map_config.alter_ego_stat_multiplier);
+    PTrust->stats.CHR = static_cast<uint16>((fCHR + mCHR + sCHR) * map_config.alter_ego_stat_multiplier);
 
     // cap all stats for mLvl / job
     for (int i = SKILL_DIVINE_MAGIC; i <= SKILL_BLUE_MAGIC; i++)
@@ -428,7 +471,7 @@ void LoadTrustStatsAndSkills(CTrustEntity* PTrust)
         uint16 maxSkill = battleutils::GetMaxSkill((SKILLTYPE)i, mJob, mLvl > 99 ? 99 : mLvl);
         if (maxSkill != 0)
         {
-            PTrust->WorkingSkills.skill[i] = maxSkill;
+            PTrust->WorkingSkills.skill[i] = static_cast<uint16>(maxSkill * map_config.alter_ego_skill_multiplier);
         }
         else //if the mob is WAR/BLM and can cast spell
         {
@@ -437,7 +480,7 @@ void LoadTrustStatsAndSkills(CTrustEntity* PTrust)
 
             if (maxSubSkill != 0)
             {
-                PTrust->WorkingSkills.skill[i] = maxSubSkill;
+                PTrust->WorkingSkills.skill[i] = static_cast<uint16>(maxSubSkill * map_config.alter_ego_skill_multiplier);
             }
         }
     }
@@ -447,7 +490,7 @@ void LoadTrustStatsAndSkills(CTrustEntity* PTrust)
         uint16 maxSkill = battleutils::GetMaxSkill((SKILLTYPE)i, mLvl > 99 ? 99 : mLvl);
         if (maxSkill != 0)
         {
-            PTrust->WorkingSkills.skill[i] = maxSkill;
+            PTrust->WorkingSkills.skill[i] = static_cast<uint16>(maxSkill * map_config.alter_ego_skill_multiplier);
         }
     }
 
