@@ -13,7 +13,7 @@ function onTrigger(player, target, cellId, reason)
     local jailCells =
     {
         -- Floor 1 (Bottom)
-        {-620, 11,  660, 0},  {-180, 11,  660, 0}, {260, 11,  660, 0}, {700, 11,  660, 0},
+        {-340, -495, 137, 0},  {-180, 11,  660, 0}, {260, 11,  660, 0}, {700, 11,  660, 0},
         {-620, 11,  220, 0},  {-180, 11,  220, 0}, {260, 11,  220, 0}, {700, 11,  220, 0},
         {-620, 11, -220, 0},  {-180, 11, -220, 0}, {260, 11, -220, 0}, {700, 11, -220, 0},
         {-620, 11, -620, 0},  {-180, 11, -620, 0}, {260, 11, -620, 0}, {700, 11, -620, 0},
@@ -48,6 +48,11 @@ function onTrigger(player, target, cellId, reason)
 
     -- Send the target to jail..
     local dest = jailCells[ cellId ]
-    targ:setCharVar( "inJail", cellId )
-    targ:setPos( dest[1], dest[2], dest[3], dest[4], 131 )
+    if cellId == 1 then        
+        targ:setCharVar( "inJail", cellId )
+        targ:setPos( dest[1], dest[2], dest[3], dest[4], 276 )
+    else
+        targ:setCharVar( "inJail", cellId )
+        targ:setPos( dest[1], dest[2], dest[3], dest[4], 131 )
+    end
 end

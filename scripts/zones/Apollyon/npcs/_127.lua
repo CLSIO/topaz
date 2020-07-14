@@ -8,8 +8,9 @@ local ID = require("scripts/zones/Apollyon/IDs")
 
 function onTrade(player, npc, trade)
     if player:hasKeyItem(tpz.ki.COSMOCLEANSE) and player:hasKeyItem(tpz.ki.RED_CARD) then
-        player:setCharVar("ApollyonEntrance", 0)
+        player:setCharVar("ApollyonEntrance", 1)
         TradeBCNM(player, npc, trade)
+		player:PrintToPlayer("You must use !unstuck ONLY if you are NOT the first one to enter")
     else
         player:messageSpecial(ID.text.NO_KEY)
     end
@@ -17,8 +18,10 @@ end
 
 function onTrigger(player, npc)
     if player:hasKeyItem(tpz.ki.COSMOCLEANSE) and player:hasKeyItem(tpz.ki.RED_CARD) then
-        player:setCharVar("ApollyonEntrance", 0)
+        player:setCharVar("ApollyonEntrance", 1)
         EventTriggerBCNM(player, npc)
+		player:PrintToPlayer("You must use !unstuck ONLY if you are NOT the first one to enter")
+
     else
         player:messageSpecial(ID.text.NO_KEY)
     end

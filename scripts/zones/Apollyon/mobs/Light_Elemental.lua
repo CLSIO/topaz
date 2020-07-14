@@ -5,10 +5,14 @@
 require("scripts/globals/limbus")
 local ID = require("scripts/zones/Apollyon/IDs")
 
+-- function onMobFight(mob,target)
+--     mob:setMod(tpz.mobMod.NO_DESPAWN)
+-- end
+
 function onMobEngaged(mob, target)
-    GetMobByID(ID.mob.APOLLYON_SW_MOB[4]+5):updateEnmity(target)
-    GetMobByID(ID.mob.APOLLYON_SW_MOB[4]+13):updateEnmity(target)
-    GetMobByID(ID.mob.APOLLYON_SW_MOB[4]+21):updateEnmity(target)
+--    GetMobByID(ID.mob.APOLLYON_SW_MOB[4]+5):updateEnmity(target)
+--    GetMobByID(ID.mob.APOLLYON_SW_MOB[4]+13):updateEnmity(target)
+--    GetMobByID(ID.mob.APOLLYON_SW_MOB[4]+21):updateEnmity(target)
 end
 
 function onMobDeath(mob, player, isKiller, noKiller)

@@ -10,7 +10,7 @@ local ID = require("scripts/zones/Aht_Urhgan_Whitegate/IDs")
 -----------------------------------
 
 function onTrade(player,npc,trade)
-    --[[
+    
     local trophies =
     {
         2616, 2617, 2618, 2613, 2614, 2615, 2610, 2611, 2612,
@@ -35,13 +35,26 @@ function onTrade(player,npc,trade)
         tpz.ki.LAVENDER_COLORED_SEAL
     }
 
-    if trade:getItemCount() == 1 then
-        if trade:hasItemQty(2477,1) then -- Trade Soul Plate
-            zeni = math.random(1,200) -- random value since soul plates aren't implemented yet.
+      if trade:getSlotCount() == 1 then
+        if trade:getItemId() == 18722 then
+            zeni = 0
+        -- if trade:hasItemQty(18722,1) then -- Trade Soul Plate
+            for nb = 1, trade:getItemCount(18722), 1 do
+                zeni = zeni + math.random(100,200) -- random value since soul plates aren't implemented yet.
+            end
             player:tradeComplete()
             player:addCurrency("zeni_point", zeni)
             player:startEvent(910,zeni)
-        else
+        elseif trade:getItemId() == 18725 then
+        -- elseif trade:hasItemQty(18725,1) then -- Trade Soul Plate
+            zeni = 0
+            for nb = 1, trade:getItemCount(18725), 1 do
+               zeni = zeni + math.random(800,1500) -- random value since soul plates aren't implemented yet.
+            end
+            player:tradeComplete()
+            player:addCurrency("zeni_point", zeni)
+            player:startEvent(910,zeni)    
+        elseif trade:getItemCount() == 1 then
             znm = -1
             found = false
 
@@ -63,11 +76,16 @@ function onTrade(player,npc,trade)
             end
         end
     end
-    ]]
+    
+end
+
+
+
+    
 end
 
 function onTrigger(player,npc)
-    --[[
+    
     if player:getCharVar("ZeniStatus") == 0 then
         player:startEvent(908)
     else
@@ -112,12 +130,12 @@ function onTrigger(player,npc)
 
         player:startEvent(909,param)
     end
-    ]]
+    
 end
 
 function onEventUpdate(player,csid,option)
-    -- printf("updateRESULT: %u",option)
-    --[[
+     printf("updateRESULT: %u",option)
+    
     local lures =
     {
         2580, 2581, 2582, 2577, 2578, 2579, 2574, 2575, 2576,
@@ -168,19 +186,24 @@ function onEventUpdate(player,csid,option)
             if n <= 2 then
                 if option == 130 or option == 440 then
                     tier = 5
+                    cost = 14000
                 else
                     tier = 1
+                    cost = 1000
                 end
             elseif n >= 3 and n <= 5 then
                 tier = 2
+                cost = 2000
             elseif n >= 6 and n <= 8 then
                 tier = 3
+                cost = 3500
             else
                 tier = 4
+                cost = 7000
             end
 
-            cost = tier * 1000 -- static pricing for now.
-
+            --cost = tier * 1000 -- static pricing for now.
+            
             if option >= 100 and option <= 130 then
                 player:updateEvent(0,0,0,0,0,0,cost)
             elseif option >= 400 and option <=440 then
@@ -222,20 +245,20 @@ function onEventUpdate(player,csid,option)
             elseif option == 500 then -- player has declined to buy a pop item
                 player:updateEvent(1,1) -- restore the "Gaining access to the islets" option.
             else
-                -- print("onEventSelection - CSID:",csid)
-                -- print("onEventSelection - option ===",option)
+                 print("onEventSelection - CSID:",csid)
+                 print("onEventSelection - option ===",option)
             end
         end
     end
-    ]]
+    
 end
 
 function onEventFinish(player,csid,option)
-    -- printf("finishRESULT: %u",option)
-    --[[
+     printf("finishRESULT: %u",option)
+    
     if csid == 908 then
         player:setCharVar("ZeniStatus",1)
         player:addCurrency("zeni_point", 2000)
     end
-    ]]
+    
 end

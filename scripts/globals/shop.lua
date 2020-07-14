@@ -185,7 +185,17 @@ tpz.shop =
                  616,    1600,    tpz.craftRank.CRAFTSMAN,      -- Pie Dough
                 2561,    3000,    tpz.craftRank.CRAFTSMAN,      -- Pizza Dough
                 8800,     600,    tpz.craftRank.CRAFTSMAN,      -- Azuki Bean
-                8903,     300,      tpz.craftRank.AMATEUR,      -- Cooking Kit 5
+		4401,     100,    tpz.craftRank.AMATEUR,        -- Moat Carp
+		4461,     200,    tpz.craftRank.AMATEUR,        -- Bastore Bream
+		4474,     125,    tpz.craftRank.AMATEUR,        -- Gigant Squid
+		4384,    1250,    tpz.craftRank.AMATEUR,        -- Black Sole
+		4485,     833,    tpz.craftRank.AMATEUR,        -- Noble Lady
+		4361,     400,    tpz.craftRank.AMATEUR,        -- Nebimonite
+		4515,      90,    tpz.craftRank.AMATEUR,        -- Copper Frog
+		4360,     120,    tpz.craftRank.AMATEUR,        -- Bastore Sardine
+		4354,     150,    tpz.craftRank.AMATEUR,        -- Shining Trout
+		4477,     890,    tpz.craftRank.AMATEUR,         -- Gavial Fish
+		8903,     300,      tpz.craftRank.AMATEUR,      -- Cooking Kit 5
                 8904,     400,      tpz.craftRank.AMATEUR,      -- Cooking Kit 10
                 8905,     650,      tpz.craftRank.AMATEUR,      -- Cooking Kit 15
                 8906,    1050,      tpz.craftRank.AMATEUR,      -- Cooking Kit 20

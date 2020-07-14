@@ -7,7 +7,10 @@ require("scripts/globals/status")
 -----------------------------------
 
 function onEffectGain(target, effect)
-    target:addMod(tpz.mod.MOVE, -effect:getPower())
+    local pSpeed = 80
+	target:speed(pSpeed/2)
+	target:addMod(tpz.mod.MOVE, -effect:getPower())
+	
 end
 
 function onEffectTick(target, effect)

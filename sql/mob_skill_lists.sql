@@ -3629,4 +3629,15 @@ INSERT INTO `mob_skill_lists` VALUES ('Ealdnarche (Apoc Nigh)',1143,988); -- War
 INSERT INTO `mob_skill_lists` VALUES ('Ealdnarche (Apoc Nigh)',1143,989); -- Warp Out (Works the same as Ealdnarche's)
 INSERT INTO `mob_skill_lists` VALUES ('Ealdnarche (Apoc Nigh)',1143,1006); -- Omega Javelin
 
+INSERT INTO `mob_skill_lists` VALUES ('Dark_Ixion',7000,2334); -- wrath_of_zeus
+INSERT INTO `mob_skill_lists` VALUES ('Dark_Ixion',7000,2335); -- lightning_spear
+INSERT INTO `mob_skill_lists` VALUES ('Dark_Ixion',7000,2336); -- acheron_kick
+INSERT INTO `mob_skill_lists` VALUES ('Dark_Ixion',7000,2337); -- damsel_memento
+INSERT INTO `mob_skill_lists` VALUES ('Dark_Ixion',7000,2338); -- rampant_stance
+INSERT INTO `mob_skill_lists` VALUES ('Dark_Ixion',7000,1542); -- Trample
+
+
+
+
+
 -- Next available ID: 1144

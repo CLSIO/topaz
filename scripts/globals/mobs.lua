@@ -120,6 +120,9 @@ tpz.mob.additionalEffect =
     STUN       = 19,
     TERROR     = 20,
     TP_DRAIN   = 21,
+    BIND       = 22,
+    WEIGHT     = 23,
+    AMNESIA    = 24,
 }
 tpz.mob.ae = tpz.mob.additionalEffect
 
@@ -364,6 +367,43 @@ local additionalEffects =
         mod = tpz.mod.INT,
         bonusAbilityParams = {bonusmab = 0, includemab = false},
         code = function(mob, target, power) local tp = math.min(power, target:getTP()) target:delTP(tp) mob:addTP(tp) end,
+    },
+	    [tpz.mob.ae.BIND] =
+    {
+        chance = 25,
+        ele = tpz.magic.ele.DARK,
+        sub = tpz.subEffect.DARKNESS_DAMAGE,
+        msg = tpz.msg.basic.ADD_EFFECT_STATUS,
+        applyEffect = true,
+        eff = tpz.effect.BIND,
+        power = 1000,
+        duration = 30,
+        minDuration = 1,
+        maxDuration = 45,
+    },
+	    [tpz.mob.ae.WEIGHT] =
+    {
+        chance = 20,
+        ele = tpz.magic.ele.LIGHTNING,
+        sub = tpz.subEffect.WEIGHT,
+        msg = tpz.msg.basic.ADD_EFFECT_STATUS,
+        applyEffect = true,
+        eff = tpz.effect.WEIGHT,
+        duration = 30,
+		minDuration = 1,
+        maxDuration = 45,
+    },
+		    [tpz.mob.ae.AMNESIA] =
+    {
+        chance = 20,
+        ele = tpz.magic.ele.LIGHTNING,
+        sub = tpz.subEffect.AMNESIA,
+        msg = tpz.msg.basic.ADD_EFFECT_STATUS,
+        applyEffect = true,
+        eff = tpz.effect.AMNESIA,
+        duration = 30,
+		minDuration = 1,
+        maxDuration = 45,
     },
 }
 

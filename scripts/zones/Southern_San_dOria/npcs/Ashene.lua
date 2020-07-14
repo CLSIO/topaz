@@ -31,6 +31,15 @@ function onTrigger(player,npc)
         16531,  3523, 3,    -- Brass Xiphos
         16535,   241, 3,    -- Bronze Sword
         16565,  1674, 3,    -- Spatha
+        17853,  75000,  3,  -- Iron Ram Horn
+        18074,  40000,  3,  --Iron Ram Lance
+        17958,  40000,  3,  --Iron Ram Pick
+        19041, 750000,  3,   --Rose Strap
+        15844,  60000,  3,   --Patronus Ring
+        15966,  60000,  3,   --Fox Earring
+        15967,  60000,  3,   --Temple Earring
+        15934,  60000,  3,   --Crimson Belt
+        11636,  100000,  3,   --Royal knight Sigil
     }
 
     player:showText(npc, ID.text.ASH_THADI_ENE_SHOP_DIALOG)

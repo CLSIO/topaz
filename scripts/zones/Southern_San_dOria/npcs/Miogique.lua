@@ -33,6 +33,19 @@ function onTrigger(player,npc)
         12440,   396, 3,    -- Leather Bandana
         12696,   331, 3,    -- Leather Gloves
         12568,   618, 3,    -- Leather Vest
+        14584,  7500,   3,  -- Iron Ram Jack Coat
+        14587,  7500,   3,  -- Pilgrim Tunica
+        16172,  20000,  3,  -- Iron Ram Shield 
+        15005,  15000,  3,  -- Iron Ram Mufflers
+        15749,  30000,  3,  -- Iron Ram Sollerets
+        16141,  20000,  3,  -- Iron Ram Helm
+        16312,  30000,  3,  -- Iron Ram Breeches
+        14581,  15000,  3,  -- Iron Ram Chainmail
+        16146, 400000,  3,  --Iron Ram Sallet
+        15009, 400000,  3,  --Iron Ram Dastanas
+        15755, 400000,  3,  --Iron Ram Greaves
+        16315, 400000,  3,  --Iron Ram Hose
+        14588, 400000,  3,  --Iron Ram Hauberk
     }
 
     player:showText(npc, ID.text.MIOGIQUE_SHOP_DIALOG)

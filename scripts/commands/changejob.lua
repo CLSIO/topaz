@@ -7,7 +7,7 @@ require("scripts/globals/status")
 
 cmdprops =
 {
-    permission = 1,
+    permission = 2,
     parameters = "si"
 }
 
@@ -30,7 +30,7 @@ function onTrigger(player, jobId, level)
 
     -- validate level
     if (level ~= nil) then
-        if (level < 1 or level > 99) then
+        if (level < 1 or level > 75) then
             error(player, "Invalid level. Level must be between 1 and 99!")
             return
         end

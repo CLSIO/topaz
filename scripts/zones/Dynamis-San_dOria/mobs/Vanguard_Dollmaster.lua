@@ -11,3 +11,9 @@ mixins =
 
 function onMobDeath(mob, player, isKiller)
 end
+
+function onMobSpawn(mob)
+----	mob:setMobMod(tpz.mobMod.NO_MOVE, 1);
+--    dynamis.refillStatueOnSpawn(mob)
+
+end

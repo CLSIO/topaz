@@ -37,7 +37,7 @@ local loot =
                 {itemid = 1951, droprate =   49}, -- RNG
                 {itemid = 1955, droprate =  200}, -- NIN
                 {itemid = 2659, droprate =   62}, -- COR
-                {itemid = 2715, droprate =  407}, -- DNC
+            --    {itemid = 2715, droprate =  407}, -- DNC
             },
             {
                 {itemid =    0, droprate = 1000}, -- Nothing
@@ -49,7 +49,7 @@ local loot =
                 {itemid = 1951, droprate =   49}, -- RNG
                 {itemid = 1955, droprate =  200}, -- NIN
                 {itemid = 2659, droprate =   62}, -- COR
-                {itemid = 2715, droprate =  407}, -- DNC
+            --    {itemid = 2715, droprate =  407}, -- DNC
             },
         },
         -- SE_Apollyon floor 2
@@ -77,7 +77,7 @@ local loot =
                 {itemid = 1955, droprate =  80}, -- NIN
                 {itemid = 1945, droprate =  90}, -- DRK
                 {itemid = 2659, droprate = 100}, -- COR
-                {itemid = 2715, droprate = 120}, -- DNC
+            --    {itemid = 2715, droprate = 120}, -- DNC
             },
             {
                 {itemid =    0, droprate = 999}, -- Nothing
@@ -90,7 +90,7 @@ local loot =
                 {itemid = 1955, droprate =  80}, -- NIN
                 {itemid = 1945, droprate =  90}, -- DRK
                 {itemid = 2659, droprate = 100}, -- COR
-                {itemid = 2715, droprate = 120}, -- DNC
+            --    {itemid = 2715, droprate = 120}, -- DNC
             },
         },
         -- SE_Apollyon floor 3
@@ -151,7 +151,7 @@ local loot =
                 {itemid = 1957, droprate = 260}, -- DRG
                 {itemid = 1953, droprate = 340}, -- SAM
                 {itemid = 2657, droprate = 220}, -- BLU
-                {itemid = 2717, droprate = 180}, -- SCH
+            --    {itemid = 2717, droprate = 180}, -- SCH
                 {itemid = 1931, droprate = 300}, -- WAR
             },
             {
@@ -160,7 +160,7 @@ local loot =
                 {itemid = 1957, droprate = 260}, -- DRG
                 {itemid = 1953, droprate = 340}, -- SAM
                 {itemid = 2657, droprate = 220}, -- BLU
-                {itemid = 2717, droprate = 180}, -- SCH
+            --    {itemid = 2717, droprate = 180}, -- SCH
                 {itemid = 1931, droprate = 300}, -- WAR
             },
             {
@@ -194,12 +194,12 @@ local loot =
                 {itemid = 1953, droprate = 304}, -- SAM
                 {itemid = 1943, droprate =  18}, -- PLD
                 {itemid = 1941, droprate = 200}, -- THF
-                {itemid = 2715, droprate = 200}, -- DNC
+            --    {itemid = 2715, droprate = 200}, -- DNC
                 {itemid = 2661, droprate =  36}, -- PUP
                 {itemid = 1933, droprate =  18}, -- MNK
                 {itemid = 1939, droprate =  36}, -- RDM
                 {itemid = 1935, droprate = 411}, -- WHM
-                {itemid = 2717, droprate = 482}, -- SCH
+            --    {itemid = 2717, droprate = 482}, -- SCH
                 {itemid = 1947, droprate =  18}, -- BST
             },
             {
@@ -207,12 +207,12 @@ local loot =
                 {itemid = 1953, droprate =  304}, -- SAM
                 {itemid = 1943, droprate =   18}, -- PLD
                 {itemid = 1941, droprate =  200}, -- THF
-                {itemid = 2715, droprate =  200}, -- DNC
+            --    {itemid = 2715, droprate =  200}, -- DNC
                 {itemid = 2661, droprate =   36}, -- PUP
                 {itemid = 1933, droprate =   18}, -- MNK
                 {itemid = 1939, droprate =   36}, -- RDM
                 {itemid = 1935, droprate =  411}, -- WHM
-                {itemid = 2717, droprate =  482}, -- SCH
+            --    {itemid = 2717, droprate =  482}, -- SCH
                 {itemid = 1947, droprate =   18}, -- BST
             },
         },
@@ -281,7 +281,7 @@ local loot =
                 {itemid = 1933, droprate =   30}, -- MNK
                 {itemid = 1941, droprate =   99}, -- THF
                 {itemid = 2661, droprate =   61}, -- PUP
-                {itemid = 2715, droprate =   30}, -- DNC
+            --    {itemid = 2715, droprate =   30}, -- DNC
                 {itemid = 1943, droprate =  160}, -- PLD
             },
             {
@@ -294,7 +294,7 @@ local loot =
                 {itemid = 1933, droprate =   30}, -- MNK
                 {itemid = 1941, droprate =   99}, -- THF
                 {itemid = 2661, droprate =   61}, -- PUP
-                {itemid = 2715, droprate =   30}, -- DNC
+            --    {itemid = 2715, droprate =   30}, -- DNC
                 {itemid = 1943, droprate =  160}, -- PLD
             },
             {
@@ -414,7 +414,7 @@ local loot =
                 {itemid = 1937, droprate =  71}, -- BLM
                 {itemid = 1931, droprate = 180}, -- WAR
                 {itemid = 2657, droprate = 210}, -- BLU
-                {itemid = 2717, droprate = 111}, -- SCH
+            --    {itemid = 2717, droprate = 111}, -- SCH
                 {itemid = 1935, droprate = 107}, -- WHM
             },
             {
@@ -425,7 +425,7 @@ local loot =
                 {itemid = 1937, droprate =   71}, -- BLM
                 {itemid = 1931, droprate =  180}, -- WAR
                 {itemid = 2657, droprate =  210}, -- BLU
-                {itemid = 2717, droprate =  111}, -- SCH
+            --    {itemid = 2717, droprate =  111}, -- SCH
                 {itemid = 1935, droprate =  107}, -- WHM
             },
         },
@@ -488,7 +488,7 @@ local loot =
                 {itemid = 1953, droprate =  48}, -- SAM
                 {itemid = 1935, droprate =  24}, -- WHM
                 {itemid = 2657, droprate =  24}, -- BLU
-                {itemid = 2717, droprate =  71}, -- SCH
+            --    {itemid = 2717, droprate =  71}, -- SCH
             },
             {
                 {itemid =    0, droprate = 120}, -- Nothing
@@ -499,7 +499,7 @@ local loot =
                 {itemid = 1953, droprate =  48}, -- SAM
                 {itemid = 1935, droprate =  24}, -- WHM
                 {itemid = 2657, droprate =  24}, -- BLU
-                {itemid = 2717, droprate =  71}, -- SCH
+            --    {itemid = 2717, droprate =  71}, -- SCH
             }, 
             {
                 {itemid =    0, droprate = 638}, -- Nothing
@@ -539,7 +539,7 @@ local loot =
                 {itemid = 1939, droprate = 191}, -- RDM
                 {itemid = 1943, droprate = 170}, -- PLD
                 {itemid = 2661, droprate = 340}, -- PUP
-                {itemid = 2715, droprate = 170}, -- DNC
+            --    {itemid = 2715, droprate = 170}, -- DNC
             },
             {
                 {itemid =    0, droprate = 400}, -- Nothing
@@ -549,7 +549,7 @@ local loot =
                 {itemid = 1939, droprate = 191}, -- RDM
                 {itemid = 1943, droprate = 170}, -- PLD
                 {itemid = 2661, droprate = 340}, -- PUP
-                {itemid = 2715, droprate = 170}, -- DNC
+            --    {itemid = 2715, droprate = 170}, -- DNC
             },
             {
                 {itemid = 1987, droprate = 1000}, -- Charcoal Chip
@@ -578,7 +578,7 @@ local loot =
                 {itemid = 1957, droprate = 100}, -- DRG
                 {itemid = 1943, droprate =  25}, -- PLD
                 {itemid = 1953, droprate = 250}, -- SAM
-                {itemid = 2717, droprate =  75}, -- SCH
+            --    {itemid = 2717, droprate =  75}, -- SCH
                 {itemid = 1931, droprate = 225}, -- WAR
                 {itemid = 1935, droprate =  50}, -- WHM
             },
@@ -705,7 +705,7 @@ local loot =
                 {itemid = 1951, droprate =  80}, -- RNG
                 {itemid = 1953, droprate = 110}, -- SAM
                 {itemid = 1959, droprate =  95}, -- SMN
-                {itemid = 2715, droprate = 123}, -- DNC
+            --    {itemid = 2715, droprate = 123}, -- DNC
                 {itemid = 1935, droprate =  48}, -- WHM
             },
         },
@@ -733,7 +733,7 @@ local loot =
                 {itemid = 1949, droprate = 283}, -- BRD
                 {itemid = 1947, droprate = 109}, -- BST
                 {itemid = 2659, droprate =  65}, -- COR
-                {itemid = 2715, droprate = 130}, -- DNC
+            --    {itemid = 2715, droprate = 130}, -- DNC
                 {itemid = 1957, droprate =  65}, -- DRG
                 {itemid = 1945, droprate = 174}, -- DRK
                 {itemid = 1933, droprate = 130}, -- MNK
@@ -743,7 +743,7 @@ local loot =
                 {itemid = 1939, droprate = 109}, -- RDM
                 {itemid = 1951, droprate = 130}, -- RNG
                 {itemid = 1953, droprate = 304}, -- SAM
-                {itemid = 2717, droprate =  87}, -- SCH
+            --    {itemid = 2717, droprate =  87}, -- SCH
                 {itemid = 1959, droprate = 217}, -- SMN
                 {itemid = 1941, droprate = 174}, -- THF
                 {itemid = 1931, droprate = 130}, -- WAR
@@ -755,7 +755,7 @@ local loot =
                 {itemid = 1949, droprate = 283}, -- BRD
                 {itemid = 1947, droprate = 109}, -- BST
                 {itemid = 2659, droprate =  65}, -- COR
-                {itemid = 2715, droprate = 130}, -- DNC
+            --    {itemid = 2715, droprate = 130}, -- DNC
                 {itemid = 1957, droprate =  65}, -- DRG
                 {itemid = 1945, droprate = 174}, -- DRK
                 {itemid = 1933, droprate = 130}, -- MNK
@@ -765,7 +765,7 @@ local loot =
                 {itemid = 1939, droprate = 109}, -- RDM
                 {itemid = 1951, droprate = 130}, -- RNG
                 {itemid = 1953, droprate = 304}, -- SAM
-                {itemid = 2717, droprate =  87}, -- SCH
+            --    {itemid = 2717, droprate =  87}, -- SCH
                 {itemid = 1959, droprate = 217}, -- SMN
                 {itemid = 1941, droprate = 174}, -- THF
                 {itemid = 1931, droprate = 130}, -- WAR
@@ -778,7 +778,7 @@ local loot =
                 {itemid = 1949, droprate = 283}, -- BRD
                 {itemid = 1947, droprate = 109}, -- BST
                 {itemid = 2659, droprate =  65}, -- COR
-                {itemid = 2715, droprate = 130}, -- DNC
+            --    {itemid = 2715, droprate = 130}, -- DNC
                 {itemid = 1957, droprate =  65}, -- DRG
                 {itemid = 1945, droprate = 174}, -- DRK
                 {itemid = 1933, droprate = 130}, -- MNK
@@ -788,7 +788,7 @@ local loot =
                 {itemid = 1939, droprate = 109}, -- RDM
                 {itemid = 1951, droprate = 130}, -- RNG
                 {itemid = 1953, droprate = 304}, -- SAM
-                {itemid = 2717, droprate =  87}, -- SCH
+            --    {itemid = 2717, droprate =  87}, -- SCH
                 {itemid = 1959, droprate = 217}, -- SMN
                 {itemid = 1941, droprate = 174}, -- THF
                 {itemid = 1931, droprate = 130}, -- WAR

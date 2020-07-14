@@ -6,8 +6,6 @@ require("scripts/globals/teleports")
 require("scripts/globals/titles")
 require("scripts/globals/zone")
 -----------------------------------
-require("scripts/quests/full_speed_ahead")
------------------------------------
 
 local startingRaceInfo =
 {
@@ -129,6 +127,11 @@ local function CharCreate(player)
     player:setCharVar("spokePyropox", 1) -- Pyropox introduction
     player:setCharVar("TutorialProgress", 1) -- Has not started tutorial
     player:setNewPlayer(true) -- apply new player flag
+    player:addItem(15793) -- Anniversary Ring
+    player:addItem(28540) -- Warp Ring
+--	player:addLinkpearl("PHYNIX");
+	
+
 end
 
 -----------------------------------
@@ -136,12 +139,21 @@ end
 -----------------------------------
 
 -- called by core after a player logs into the server or zones
-function onGameIn(player, firstLogin, zoning)
-    if not zoning then
-        -- things checked ONLY during logon go here
-        if firstLogin then
-            CharCreate(player)
+function onGameIn(player, firstlogin, zoning)
+
+    if (not zoning) then 
+    	-- Things checked ONLY during logon go here.
+        if (firstlogin) then
+--			player:addLinkpearl("PHYNIX");
+            CharCreate(player);
+            
+			player:PrintToArea("has joined the server! Welcome!", 33, 0, player:getName())
         end
+		
+		if player:getCharVar("BotMode") == 1 then
+			player:setCharVar("BotMode", 0)
+		--	player:PrintToPlayer("Bot Mode has been removed ~ Thanks for Playing! ")
+		end
     else
         -- things checked ONLY during zone in go here
     end
@@ -183,12 +195,25 @@ function onGameIn(player, firstLogin, zoning)
 
     -- remember time player zoned in (e.g., to support zone-in delays)
     player:setLocalVar("ZoneInTime", os.time())
+	
+	
 end
 
 function onPlayerLevelUp(player)
+	-- Check if player has Bot status set and delevel instead of leveling up.
+    if player:getCharVar("BotMode") == 1 then
+		local pLevel = player:getMainLvl()
+		player:setLevel(pLevel-2)
+	end
 end
 
 function onPlayerLevelDown(player)
+--	-- Check if player has Bot status set and delevel instead of leveling up.
+--    if player:getCharVar("[PVP]") == 1 then
+--		local pLevel = player:getMainLvl()
+--		player:setLevel(pLevel+1)
+--		player:PrintToPlayer(format.string("Your level was set to %s", player:getMainLvl()))
+--	end
 end
 
 function onPlayerEmote(player, emoteId)   

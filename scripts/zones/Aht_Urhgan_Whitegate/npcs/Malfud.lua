@@ -17,7 +17,9 @@ function onTrigger(player,npc)
         633,  16,    -- Olive Oil
         4388, 44,    -- Eggplant
         4390, 40,    -- Mithran Tomato
-        2213, 12     -- Pine Nuts
+        2213, 12,     -- Pine Nuts
+        18722, 10000,   --blank soul plate zeni range 100-200
+        18725, 50000   --High Speed Soul Plate zeni 800-1500
     }
 
     player:showText(npc,ID.text.MALFUD_SHOP_DIALOG)

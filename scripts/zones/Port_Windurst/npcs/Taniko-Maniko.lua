@@ -27,6 +27,16 @@ function onTrigger(player,npc)
         16512, 3215, 3,    -- Bilbo
         16530,  618, 3,    -- Xiphos
         16565, 1674, 3,    -- Spatha
+        19150,  40000,  3,  -- Cobra Claymore
+        18756,  40000,  3,  --Cobra Unit Baghnakhs
+        19100,  40000,  3,  --Cobra Unit Knife
+        18728,  200000,  3,   --Cobra Unit Bow
+        15935,  60000,  3,   --Capricornian Rope
+        13244,  60000,  3,   --Earthy Belt
+        16293,  500000,  3,   --Cougar Pendant
+        16294,  60000,  3,   --Crocodile Collar
+        19042,  100000,  3,   --Ariesian Grip
+        11588,  60000,  3,   --Mercenary major charm
     }
 
     player:showText(npc, ID.text.TANIKOMANIKO_SHOP_DIALOG)

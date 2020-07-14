@@ -24,6 +24,18 @@ function onTrigger(player,npc)
         12801, 58738, 1,    -- Mythril Cuisses
         12929, 36735, 1,    -- Mythril Leggings
         13198, 20037, 1,    -- Swordbelt
+        14585,  7500,   3,  -- Fourth Tunica
+        14587,  7500,   3,  -- Pilgrim Tunica
+        15006,  50000,  3,  -- Fourth Gauntlets
+        15750,  15000,  3,  -- Fourth Sabatons
+        16142,  20000,  3,  -- Fourth Armet
+        16313,  20000,  3,  -- Fourth Cuisses
+        14582,  40000,  3,  -- Fourth Cuirass
+        16147,  15000,  3,  -- Fourth Habue
+        15010,  60000,  3,  --IFourth Hentzes
+        15756,  60000,  3,  --Fourth Schuhs
+        16316,  60000,  3,  --Fourth Schoss
+        14589,  200000,  3,  --Fourth Division Brunne
     }
 
     player:showText(npc, ID.text.CHARGINGCHOCOBO_SHOP_DIALOG)

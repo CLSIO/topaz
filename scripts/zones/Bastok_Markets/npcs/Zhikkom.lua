@@ -22,6 +22,16 @@ function onTrigger(player,npc)
         16530,   618, 3, -- Xiphos
         16565,  1711, 3, -- Spatha
         16512,  3215, 3, -- Bilbo
+        18727,  40000,  3,  --Fourth Gun
+        18494,  100000,  3,  --Fourth Toporok
+        18854,  40000,  3,  --Fourth Mace
+        18946,  40000,  3,  --Fourth Zaghnal
+        16291,  60000,  3,   --Shield Collor
+        18734,  250000,  3,   --Sturm's Report
+        18735,  60000,  3,   --Sonia's Plectrum
+        16292,  60000,  3,   --Bull Necklace
+        16258,  200000,  3,   --Arrestor Mantle
+        11545,  50000,  3,   --Fourth Mantle
     }
 
     player:showText(npc, ID.text.ZHIKKOM_SHOP_DIALOG)

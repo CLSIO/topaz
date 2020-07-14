@@ -1569,17 +1569,13 @@ INSERT INTO `mob_droplist` VALUES (251,0,0,1000,17294,140);
 INSERT INTO `mob_droplist` VALUES (252,0,0,1000,914,20);
 INSERT INTO `mob_droplist` VALUES (252,0,0,1000,2917,100);
 INSERT INTO `mob_droplist` VALUES (253,0,0,1000,18246,1000);
-INSERT INTO `mob_droplist` VALUES (254,0,0,1000,679,100);
-INSERT INTO `mob_droplist` VALUES (254,0,0,1000,3215,100);
-INSERT INTO `mob_droplist` VALUES (254,0,0,1000,3215,50);
-INSERT INTO `mob_droplist` VALUES (254,0,0,1000,3215,30);
-INSERT INTO `mob_droplist` VALUES (254,0,0,1000,3217,100);
-INSERT INTO `mob_droplist` VALUES (254,0,0,1000,4761,100);
-INSERT INTO `mob_droplist` VALUES (254,0,0,1000,4890,100);
-INSERT INTO `mob_droplist` VALUES (254,0,0,1000,4892,100);
-INSERT INTO `mob_droplist` VALUES (254,0,0,1000,5097,100);
-INSERT INTO `mob_droplist` VALUES (254,0,0,1000,18474,1000);
-INSERT INTO `mob_droplist` VALUES (254,0,0,1000,18896,100);
+INSERT INTO `mob_droplist` VALUES (254,0,0,10,1450,1); -- dynamis sandy - Lungo-nango_jadeshell
+INSERT INTO `mob_droplist` VALUES (254,0,0,10,1455,1000); -- dynamis sandy - one_byne_bill
+INSERT INTO `mob_droplist` VALUES (254,0,0,10,1455,1000); -- dynamis sandy - one_byne_bill
+INSERT INTO `mob_droplist` VALUES (254,0,0,10,1455,10); -- dynamis sandy - one_byne_bill
+INSERT INTO `mob_droplist` VALUES (254,0,0,10,1455,10); -- dynamis sandy - one_byne_bill
+
+
 INSERT INTO `mob_droplist` VALUES (255,0,0,1000,942,100);
 INSERT INTO `mob_droplist` VALUES (255,0,0,1000,2015,490);
 INSERT INTO `mob_droplist` VALUES (256,0,0,1000,816,180);
@@ -14689,9 +14685,9 @@ INSERT INTO `mob_droplist` VALUES (2728,2,0,1000,749,0);
 INSERT INTO `mob_droplist` VALUES (2728,0,0,1000,841,20);
 INSERT INTO `mob_droplist` VALUES (2728,0,0,1000,5008,50);
 INSERT INTO `mob_droplist` VALUES (2728,0,0,1000,5012,60);
-INSERT INTO `mob_droplist` VALUES (2729,2,0,1000,751,0);
-INSERT INTO `mob_droplist` VALUES (2729,0,0,1000,2525,20);
-INSERT INTO `mob_droplist` VALUES (2729,0,0,1000,2558,130);
+INSERT INTO `mob_droplist` VALUES (2729,2,0,1000,1449,1); -- dynamis sandy tukuku whiteshell
+INSERT INTO `mob_droplist` VALUES (2729,0,0,1000,1452,20); -- dynamis sandy ordelle bronzepiece
+INSERT INTO `mob_droplist` VALUES (2729,0,0,1000,1455,130); -- dynamis one byne bill
 INSERT INTO `mob_droplist` VALUES (2730,2,0,1000,748,0);
 INSERT INTO `mob_droplist` VALUES (2730,0,0,1000,841,20);
 INSERT INTO `mob_droplist` VALUES (2730,0,0,1000,2525,20);
@@ -16288,37 +16284,46 @@ INSERT INTO `mob_droplist` VALUES (3126,0,0,1000,2718,10);
 INSERT INTO `mob_droplist` VALUES (3126,0,0,1000,2723,10);
 INSERT INTO `mob_droplist` VALUES (3126,0,0,1000,3495,15);
 INSERT INTO `mob_droplist` VALUES (3126,0,0,1000,3473,850);
-INSERT INTO `mob_droplist` VALUES (3127,2,0,1000,1449,0); -- (Lost_Nantina, Va)
-INSERT INTO `mob_droplist` VALUES (3127,2,0,1000,1452,0);
-INSERT INTO `mob_droplist` VALUES (3127,2,0,1000,1455,0);
-INSERT INTO `mob_droplist` VALUES (3127,0,0,1000,1449,250);
-INSERT INTO `mob_droplist` VALUES (3127,0,0,1000,1450,10);
-INSERT INTO `mob_droplist` VALUES (3127,0,0,1000,1452,250);
-INSERT INTO `mob_droplist` VALUES (3127,0,0,1000,1453,10);
-INSERT INTO `mob_droplist` VALUES (3127,0,0,1000,1455,250);
-INSERT INTO `mob_droplist` VALUES (3127,0,0,1000,1456,10);
-INSERT INTO `mob_droplist` VALUES (3127,0,0,1000,2033,10);
-INSERT INTO `mob_droplist` VALUES (3127,0,0,1000,2038,10);
-INSERT INTO `mob_droplist` VALUES (3127,0,0,1000,2043,10);
-INSERT INTO `mob_droplist` VALUES (3127,0,0,1000,2048,10);
-INSERT INTO `mob_droplist` VALUES (3127,0,0,1000,2053,10);
-INSERT INTO `mob_droplist` VALUES (3127,0,0,1000,2058,10);
-INSERT INTO `mob_droplist` VALUES (3127,0,0,1000,2063,10);
-INSERT INTO `mob_droplist` VALUES (3127,0,0,1000,2068,10);
-INSERT INTO `mob_droplist` VALUES (3127,0,0,1000,2073,10);
-INSERT INTO `mob_droplist` VALUES (3127,0,0,1000,2078,10);
-INSERT INTO `mob_droplist` VALUES (3127,0,0,1000,2083,10);
-INSERT INTO `mob_droplist` VALUES (3127,0,0,1000,2088,10);
-INSERT INTO `mob_droplist` VALUES (3127,0,0,1000,2093,10);
-INSERT INTO `mob_droplist` VALUES (3127,0,0,1000,2098,10);
-INSERT INTO `mob_droplist` VALUES (3127,0,0,1000,2103,10);
-INSERT INTO `mob_droplist` VALUES (3127,0,0,1000,2662,10);
-INSERT INTO `mob_droplist` VALUES (3127,0,0,1000,2667,10);
-INSERT INTO `mob_droplist` VALUES (3127,0,0,1000,2672,10);
-INSERT INTO `mob_droplist` VALUES (3127,0,0,1000,2718,10);
-INSERT INTO `mob_droplist` VALUES (3127,0,0,1000,2723,10);
-INSERT INTO `mob_droplist` VALUES (3127,0,0,1000,3495,15);
-INSERT INTO `mob_droplist` VALUES (3127,0,0,1000,3471,850);
+INSERT INTO `mob_droplist` VALUES (3127,2,0,1000,1449,10); -- (Lost_Nantina, Va)
+INSERT INTO `mob_droplist` VALUES (3127,2,0,1000,1452,10);
+INSERT INTO `mob_droplist` VALUES (3127,2,0,1000,1455,10);
+INSERT INTO `mob_droplist` VALUES (3127,0,0,1,1449,5);
+INSERT INTO `mob_droplist` VALUES (3127,0,0,1,1450,1);
+INSERT INTO `mob_droplist` VALUES (3127,0,0,1000,1452,200);
+INSERT INTO `mob_droplist` VALUES (3127,0,0,1000,1452,200);
+INSERT INTO `mob_droplist` VALUES (3127,0,0,1,1453,1);
+INSERT INTO `mob_droplist` VALUES (3127,0,0,1000,1455,50);
+INSERT INTO `mob_droplist` VALUES (3127,0,0,1,1456,1);
+INSERT INTO `mob_droplist` VALUES (3127,0,0,20,18308,20); -- sandy relic katana
+INSERT INTO `mob_droplist` VALUES (3127,0,0,20,18290,20); -- sandy relic GA
+INSERT INTO `mob_droplist` VALUES (3127,0,0,20,18332,20); --  sandy relic gun
+INSERT INTO `mob_droplist` VALUES (3127,0,0,20,18296,20); --  sandy relic spear
+INSERT INTO `mob_droplist` VALUES (3127,0,0,10,15132,10); --  sandy AF war feet
+INSERT INTO `mob_droplist` VALUES (3127,0,0,10,15118,10); --  sandy AF mnk legs
+INSERT INTO `mob_droplist` VALUES (3127,0,0,10,15074,10); --  sandy AF whm hat
+INSERT INTO `mob_droplist` VALUES (3127,0,0,10,15136,10); --  sandy AF rdm boots
+INSERT INTO `mob_droplist` VALUES (3127,0,0,10,15108,10); --  sandy AF pld hands
+INSERT INTO `mob_droplist` VALUES (3127,0,0,10,15125,10); --  sandy AF bst legs
+INSERT INTO `mob_droplist` VALUES (3127,0,0,10,15081,10); --  sandy AF brd head
+INSERT INTO `mob_droplist` VALUES (3127,0,0,10,15127,10); --  sandy AF rng legs
+INSERT INTO `mob_droplist` VALUES (3127,0,0,10,15129,10); --  sandy AF nin legs
+INSERT INTO `mob_droplist` VALUES (3127,0,0,10,15145,10); --  sandy AF drg boots
+INSERT INTO `mob_droplist` VALUES (3127,0,0,10,15146,10); --  sandy AF smn boots
+INSERT INTO `mob_droplist` VALUES (3127,0,0,10,15025,10); --  sandy AF blu hands
+INSERT INTO `mob_droplist` VALUES (3127,0,0,10,16349,10); --  sandy AF cor legs
+INSERT INTO `mob_droplist` VALUES (3127,0,0,10,11388,10); --  sandy AF pup boots
+INSERT INTO `mob_droplist` VALUES (3127,0,0,10,1519,10); --  sandy fresh orc liver
+INSERT INTO `mob_droplist` VALUES (3127,0,0,10,1517,10); --  sandy giant frozen head
+INSERT INTO `mob_droplist` VALUES (3127,0,0,10,1516,10); --  sandy griffin hide
+INSERT INTO `mob_droplist` VALUES (3127,0,0,10,749,10); --  sandy gold beastman coin
+INSERT INTO `mob_droplist` VALUES (3127,0,0,10,1474,10); --  sandy infinity core
+INSERT INTO `mob_droplist` VALUES (3127,0,0,10,749,10); --  sandy mythril beastcoin
+INSERT INTO `mob_droplist` VALUES (3127,0,0,10,1470,10); --  sandy sparkling stone
+
+
+
+
+
 INSERT INTO `mob_droplist` VALUES (3128,0,0,1000,1450,10); -- (Arch_Christelle, Va) lungo-nango_jadeshell
 INSERT INTO `mob_droplist` VALUES (3128,0,0,1000,1453,10); -- montiont_silverpiece
 INSERT INTO `mob_droplist` VALUES (3128,0,0,1000,1456,10); -- one_hundred_byne_bill
