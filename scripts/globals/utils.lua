@@ -16,6 +16,25 @@ function utils.shuffle(tab)
     return res
 end
 
+-- Generates a random permutation of integers >= min_val and <= max_val
+-- If a min_val isn't given, 1 is used (assumes permutation of lua indices)
+function utils.permgen(max_val, min_val)
+    local indices = {}
+    min_val = min_val or 1
+
+    if min_val >= max_val then
+        for iter = min_val, max_val, -1 do
+            indices[iter] = iter
+        end
+    else
+        for iter = min_val, max_val, 1 do
+            indices[iter] = iter
+        end
+    end
+
+    return utils.shuffle(indices)
+end
+
 function utils.clamp(input, min_val, max_val)
     if input < min_val then
         input = min_val
@@ -32,7 +51,7 @@ function utils.stoneskin(target, dmg)
         skin = target:getMod(tpz.mod.STONESKIN)
         if (skin > 0) then
             if (skin > dmg) then --absorb all damage
-                target:delMod(tpz.mod.STONESKIN,dmg)
+                target:delMod(tpz.mod.STONESKIN, dmg)
                 return 0
             else --absorbs some damage then wear
                 target:delStatusEffect(tpz.effect.STONESKIN)
@@ -127,7 +146,7 @@ end
 --    The arguments are skill rank (numerical), and level.  1 is A+, 2 is A-, and so on.
 -----------------------------------
 
-function utils.getSkillLvl(rank,level)
+function utils.getSkillLvl(rank, level)
 
     local skill = 0 --Failsafe
 

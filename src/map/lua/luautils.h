@@ -141,7 +141,7 @@ namespace luautils
     int32 setMobPos(lua_State*);                                                // set a mobs position (only if mob is not in combat)
 
     int32 GetHealingTickDelay(lua_State* L);                                    // Returns the configured healing tick delay
-
+    int32 GetItem(lua_State* L);                                                // Returns a newly minted item object of the specified ID
     int32 getAbility(lua_State*);
     int32 getSpell(lua_State*);
 
@@ -149,6 +149,8 @@ namespace luautils
     int32 DespawnMob(lua_State*);                                               // Despawn (Fade Out) Mob By Id
     int32 GetPlayerByName(lua_State*);                                          // Gets Player ref from a name supplied
     int32 GetPlayerByID(lua_State*);                                            // Gets Player ref from an Id supplied
+    int32 GetMagianTrial(lua_State*);
+    int32 GetMagianTrialsWithParent(lua_State* L);
     int32 GetMobAction(lua_State*);                                             // Get Mobs current action
     int32 VanadielTime(lua_State*);                                             // Gets the current Vanadiel Time in timestamp format (SE epoch in earth seconds)
     int32 VanadielTOTD(lua_State*);                                             // текущее игровое время суток
@@ -290,11 +292,9 @@ namespace luautils
     void OnFurniturePlaced(CCharEntity* PChar, CItemFurnishing* itemId);
     void OnFurnitureRemoved(CCharEntity* PChar, CItemFurnishing* itemId);
 
-    void OnPlayerEmote(CCharEntity* PChar, Emote EmoteID);
-
     int32 SelectDailyItem(lua_State* L);
-	
-	
+
+
     int32 OnFishingStart(CCharEntity* PChar, int32 RodID, int32 BaitID, int32 AreaID);                            // triggers when player starts fishing in a zone
     fishresponse_t* OnFishingCheck(CCharEntity* PChar, fishingrod_t* Rod, std::vector<fish_t>* FishList,
         std::vector<fishmob_t>* MobList, uint8 AreaID, string_t AreaName, fishinglure_t* Lure, uint8 Difficulty); // fishing process hook check
@@ -304,6 +304,8 @@ namespace luautils
     int32 OnFishingCatch(CCharEntity* PChar, uint8 CatchType, int32 CatchID);                                     // triggers when player catches fish
     int32 OnFishingEnd(CCharEntity* PChar);                                                                       // triggers when player stops fishing
 
+
+    void OnPlayerEmote(CCharEntity* PChar, Emote EmoteID);
 
 };
 

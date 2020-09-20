@@ -39,7 +39,7 @@ public:
     CLuaBaseEntity(lua_State*);
     CLuaBaseEntity(CBaseEntity*);
 
-    CBaseEntity* GetBaseEntity()const
+    CBaseEntity* GetBaseEntity() const
     {
         return m_PBaseEntity;
     }
@@ -54,6 +54,7 @@ public:
     int32 messagePublic(lua_State*);        // Sends a public Basic Message
     int32 messageSpecial(lua_State*);       // Sends Special Message
     int32 messageSystem(lua_State*);        // Sends System Message
+    int32 messageCombat(lua_State* L);      // Sends Combat Message
 
     // Variables
     int32 getCharVar(lua_State*);           // Returns a character variable
@@ -181,6 +182,7 @@ public:
 
     // Items
     int32 getEquipID(lua_State*);            // Gets the Item Id of the item in specified slot
+    int32 getEquippedItem(lua_State *);      // Returns the item object from specified slot
     int32 hasItem(lua_State*);               // Check to see if Entity has item in inventory (hasItem(itemNumber))
     int32 addItem(lua_State*);               // Add item to Entity inventory (additem(itemNumber,quantity))
     int32 delItem(lua_State*);
@@ -245,6 +247,7 @@ public:
     int32 getCampaignAllegiance(lua_State*); // Gets Campaign Allegiance of Entity
     int32 setCampaignAllegiance(lua_State*); // Sets Campaign Allegiance of Entity
 
+    int32 isSeekingParty(lua_State* L);
     int32 getNewPlayer(lua_State* L);
     int32 setNewPlayer(lua_State* L);
     int32 getMentor(lua_State* L);
@@ -280,6 +283,7 @@ public:
     int32 setsLevel(lua_State*);            // sets the character's level
     int32 levelCap(lua_State*);             // genkai
     int32 levelRestriction(lua_State*);     // Establish/return current level restriction
+    int32 addJobTraits(lua_State*);         // Add job traits
 
     // Player Titles and Fame
     int32 getTitle(lua_State*);             // Gets character's title
@@ -312,6 +316,11 @@ public:
     int32 completeMission(lua_State*);      // Complete Mission
     int32 setMissionLogEx(lua_State*);      // Sets mission log extra data to correctly track progress in branching missions.
     int32 getMissionLogEx(lua_State*);      // Gets mission log extra data.
+
+    int32 setEminenceCompleted(lua_State *L);  // Sets the complete flag for a record of eminence
+    int32 getEminenceCompleted(lua_State *L);  // Gets the record completed flag
+    int32 setEminenceProgress(lua_State *L);   // Sets progress on a record of eminence
+    int32 getEminenceProgress(lua_State *L);   // gets progress on a record of eminence
 
     int32 addAssault(lua_State*);           // Add Mission
     int32 delAssault(lua_State*);           // Delete Mission from Mission Log
@@ -421,7 +430,7 @@ public:
     int32 getPartyMember(lua_State* L);             // Get a character entity from another entity's party or alliance
     int32 getPartyLeader(lua_State* L);
     int32 getLeaderID(lua_State* L);              // Get the id of the alliance/party leader *falls back to player id if no party*
-
+    int32 getPartyLastMemberJoinedTime(lua_State* L);
     int32 forMembersInRange(lua_State* L);
 
     int32 addPartyEffect(lua_State*);               // Adds Effect to all party members
@@ -433,10 +442,10 @@ public:
 
     int32 reloadParty(lua_State* L);
     int32 disableLevelSync(lua_State* L);
+    int32 isLevelSync(lua_State* L);
 
     int32 checkSoloPartyAlliance(lua_State*);        // Check if Player is in Party or Alliance 0=Solo 1=Party 2=Alliance
 
-    int32 checkFovAllianceAllowed(lua_State*);       // checks the map config, 1 if alliance is allowed to farm Fov pages
     int32 checkKillCredit(lua_State*);
 
     // Instances
@@ -593,11 +602,13 @@ public:
     int32 spawnPet(lua_State*);              // Calls Pet
     int32 despawnPet(lua_State*);            // Despawns Pet
 
-    int32 spawnTrust(lua_State*);            // Spawns trust
+    int32 spawnTrust(lua_State*);
     int32 clearTrusts(lua_State*);
     int32 getTrustID(lua_State*);
+    int32 trustPartyMessage(lua_State*);
     int32 addSimpleGambit(lua_State*);
     int32 addFullGambit(lua_State*);
+    int32 setTPSkills(lua_State*);
 
     int32 isJugPet(lua_State*);              // If the entity has a pet, test if it is a jug pet.
     int32 hasValidJugPetItem(lua_State*);

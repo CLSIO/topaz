@@ -29,8 +29,8 @@ local battlefields = {
     [8] = {                 -- BONEYARD GULLY
         { 0,  672,    0},   -- Head Wind (PM5-3 U2)
      -- { 1,  673,    0},   -- Like the Wind (ENM) -- TODO: mob constantly runs during battle
-     -- { 2,  674,    0},   -- Sheep in Antlion's Clothing (ENM)
-     -- { 3,  675,    0},   -- Shell We Dance? (ENM)
+        { 2,  674,    0},   -- Sheep in Antlion's Clothing (ENM)
+        { 3,  675,    0},   -- Shell We Dance? (ENM)
      -- { 4,  676,    0},   -- Totentanz (ENM)
      -- { 5,  677,    0},   -- Tango with a Tracker (Quest)
      -- { 6,  678,    0},   -- Requiem of Sin (Quest)
@@ -194,7 +194,7 @@ local battlefields = {
      -- {17,   17, 1180},   -- Contaminated Colosseum (KS30) -- TODO: Extremely Bad Breath mobskill
      -- {18,   18, 3351},   -- Kindergarten Cap (KC30)
      -- {19,   19, 3352},   -- Last Orc-Shunned Hero (KC50)
-     -- {20,   20,    0},   -- Beyond Infinity (Quest)
+        {20,   20,    0},   -- Beyond Infinity (Quest)
      -- {21,    ?, 4062},   -- *Tails of Woe (SKC10)
      -- {22,    ?, 4063},   -- *Dismemberment Brigade (SKC20)
      -- {23,    ?,    0},   -- A Feast Most Dire (Quest)
@@ -227,11 +227,11 @@ local battlefields = {
         {14,   78, 1177},   -- The Final Bout (BS50) -- TODO: mobskills Big Blow and Counterstance
         {15,   79, 1130},   -- Up in Arms (BS60)
      -- {16,   80, 1175},   -- Copycat (KS30)
-     -- {17,   81, 1178},   -- Operation Desert Swarm (KS30) -- TODO: Wild Rage gets stronger as they die.  Sync TP moves.  Self-bind/stun.  Build sleep resistance.
+        {17,   81, 1178},   -- Operation Desert Swarm (KS30) -- TODO: Wild Rage gets stronger as they die. Build sleep resistance.
      -- {18,   82, 1180},   -- Prehistoric Pigeons (KS30) -- TODO: Build resistance to sleep quickly. When one dies, remaining ones become more powerful.
      -- {19,   83, 3351},   -- The Palborough Project (KC30)
      -- {20,   84, 3352},   -- Shell Shocked (KC50)
-     -- {21,   85,    0},   -- Beyond Infinity (Quest)
+        {21,   85,    0},   -- Beyond Infinity (Quest)
      -- {22,    ?, 4062},   -- *The Worm's Tail (SKC10)
      -- {23,    ?, 4063},   -- *Grimshell Shocktroopers (SKC20)
      -- {24,    ?,    0},   -- A Feast Most Dire (Quest)
@@ -258,7 +258,7 @@ local battlefields = {
      -- {17,  113, 1180},   -- Moa Constrictors (KS30)
      -- {18,  114, 3351},   -- The V Formation (KC30)
      -- {19,  115, 3352},   -- Avian Apostates (KC50)
-     -- {20,  116,    0},   -- Beyond Infinity (Quest)
+        {20,  116,    0},   -- Beyond Infinity (Quest)
      -- {21,    ?, 4062},   -- *Steamed Sprouts (SKC10)
      -- {22,    ?, 4063},   -- *Divine Punishers (SKC20)
      -- {23,    ?,    0},   -- A Feast Most Dire (Quest)
@@ -401,7 +401,7 @@ local battlefields = {
         {18,  530, 2556},   -- A Furious Finale (DNC LB5)
      -- {19,  531,    0},   -- Clash of the Comrades (Quest)
      -- {20,  532,    0},   -- Those Who Lurk in Shadows (ACP7)
-     -- {21,  533,    0},   -- Beyond Infinity (Quest)
+        {21,  533,    0},   -- Beyond Infinity (Quest)
      -- {22,    ?, 4062},   -- *Factory Rejects (SKC10)
      -- {23,    ?, 4063},   -- *Demolition Squad (SKC20)
      -- {24,    ?, 4063},   -- *Brothers D'Aurphe (SKC20)
@@ -459,7 +459,7 @@ function checkReqs(player, npc, bfid, registrant)
     local stc = player:hasCompletedMission(SANDORIA, mi.sandoria.SAVE_THE_CHILDREN)
     local dm1 = player:getQuestStatus(OUTLANDS, tpz.quest.id.outlands.DIVINE_MIGHT)
     local dm2 = player:getQuestStatus(OUTLANDS, tpz.quest.id.outlands.DIVINE_MIGHT_REPEAT)
-    
+
     local function getEntranceOffset(offset)
         return zones[player:getZoneID()].npc.ENTRANCE_OFFSET + offset
     end
@@ -481,11 +481,13 @@ function checkReqs(player, npc, bfid, registrant)
         [  70] = function() return ( mjob == tpz.job.RDM and mlvl >= 66                                                                                                     ) end, -- Quest: Shattering Stars (RDM LB5)
         [  71] = function() return ( mjob == tpz.job.THF and mlvl >= 66                                                                                                     ) end, -- Quest: Shattering Stars (THF LB5)
         [  72] = function() return ( mjob == tpz.job.BST and mlvl >= 66                                                                                                     ) end, -- Quest: Shattering Stars (BST LB5)
+        [  85] = function() return ( player:hasKeyItem(tpz.ki.SOUL_GEM_CLASP)                                                                                               ) end, -- Quest: Beyond Infinity
         [  96] = function() return ( player:hasKeyItem(tpz.ki.DARK_KEY)                                                                                                     ) end, -- Mission 2-3
         [  99] = function() return ( windy == mi.windurst.SAINTLY_INVITATION and natStat == 1                                                                               ) end, -- Windy 6-2: A Saintly Invitation
         [ 101] = function() return ( mjob == tpz.job.MNK and mlvl >= 66                                                                                                     ) end, -- Quest: Shattering Stars (MNK LB5)
         [ 102] = function() return ( mjob == tpz.job.WHM and mlvl >= 66                                                                                                     ) end, -- Quest: Shattering Stars (WHM LB5)
         [ 103] = function() return ( mjob == tpz.job.SMN and mlvl >= 66                                                                                                     ) end, -- Quest: Shattering Stars (SMN LB5)
+        [ 116] = function() return ( player:hasKeyItem(tpz.ki.SOUL_GEM_CLASP)                                                                                               ) end, -- Quest: Beyond Infinity
         [ 128] = function() return ( roz == mi.zilart.THE_TEMPLE_OF_UGGALEPIH                                                                                               ) end, -- ZM4: The Temple of Uggalepih
         [ 160] = function() return ( nat == mi.nation.SHADOW_LORD and natStat == 3                                                                                          ) end, -- Mission 5-2
         [ 161] = function() return ( basty == mi.bastok.WHERE_TWO_PATHS_CONVERGE and natStat == 1                                                                           ) end, -- Basty 9-2: Where Two Paths Converge
@@ -522,6 +524,7 @@ function checkReqs(player, npc, bfid, registrant)
         [ 518] = function() return ( mjob == tpz.job.DRK and mlvl >= 66                                                                                                     ) end, -- Quest: Shattering Stars (DRK LB5)
         [ 519] = function() return ( mjob == tpz.job.BRD and mlvl >= 66                                                                                                     ) end, -- Quest: Shattering Stars (BRD LB5)
         [ 530] = function() return ( mjob == tpz.job.DNC and mlvl >= 66                                                                                                     ) end, -- Quest: A Furious Finale (DNC LB5)
+        [ 533] = function() return ( player:hasKeyItem(tpz.ki.SOUL_GEM_CLASP)                                                                                               ) end, -- Quest: Beyond Infinity
         [ 544] = function() return ( player:hasKeyItem(tpz.ki.TUNING_FORK_OF_FIRE)                                                                                          ) end, -- Quest: Trial by Fire
         [ 545] = function() return ( mjob == tpz.job.SMN and mlvl >= 20                                                                                                     ) end, -- Quest: Trial-size Trial by Fire
         [ 547] = function() return ( asa == mi.asa.SUGAR_COATED_DIRECTIVE and player:hasKeyItem(tpz.ki.DOMINAS_SCARLET_SEAL)                                                ) end, -- ASA4: Sugar-coated Directive
@@ -600,11 +603,31 @@ function checkReqs(player, npc, bfid, registrant)
     -- requirements to enter a battlefield already registered by a party member
     local enterReqs =
     {
+        [ 641] = function() return ( player:hasKeyItem(tpz.ki.ZEPHYR_FAN)                                                                                   ) end, -- ENM: Follow the White Rabbit
+        [ 642] = function() return ( player:hasKeyItem(tpz.ki.ZEPHYR_FAN)                                                                                   ) end, -- ENM: When Hell Freezes Over
+        [ 643] = function() return ( player:hasKeyItem(tpz.ki.ZEPHYR_FAN)                                                                                   ) end, -- ENM: Brothers
+        [ 644] = function() return ( player:hasKeyItem(tpz.ki.ZEPHYR_FAN)                                                                                   ) end, -- ENM: Holy Cow
+        [ 673] = function() return ( player:hasKeyItem(tpz.ki.MIASMA_FILTER)                                                                                ) end, -- ENM: Like the Wind
+        [ 674] = function() return ( player:hasKeyItem(tpz.ki.MIASMA_FILTER)                                                                                ) end, -- ENM: Sheep in Antlion's Clothing
+        [ 675] = function() return ( player:hasKeyItem(tpz.ki.MIASMA_FILTER)                                                                                ) end, -- ENM: Shell We Dance?
+        [ 676] = function() return ( player:hasKeyItem(tpz.ki.MIASMA_FILTER)                                                                                ) end, -- ENM: Totentanz
+        [ 705] = function() return ( player:hasKeyItem(tpz.ki.ASTRAL_COVENANT)                                                                              ) end, -- ENM: Test Your Mite
+        [ 738] = function() return ( player:hasKeyItem(tpz.ki.SHAFT_2716_OPERATING_LEVER)                                                                   ) end, -- ENM: Bionic Bug
+        [ 739] = function() return ( player:hasKeyItem(tpz.ki.SHAFT_GATE_OPERATING_DIAL)                                                                    ) end, -- ENM: Pulling Your Strings
+        [ 740] = function() return ( player:hasKeyItem(tpz.ki.SHAFT_GATE_OPERATING_DIAL)                                                                    ) end, -- ENM: Automaton Assault
+        [ 769] = function() return ( player:hasKeyItem(tpz.ki.CENSER_OF_ABANDONMENT)                                                                        ) end, -- ENM: Simulant
+        [ 801] = function() return ( player:hasKeyItem(tpz.ki.CENSER_OF_ANTIPATHY)                                                                          ) end, -- ENM: You Are What You Eat
+        [ 833] = function() return ( player:hasKeyItem(tpz.ki.CENSER_OF_ANIMUS)                                                                             ) end, -- ENM: Playing Host
+        [ 865] = function() return ( player:hasKeyItem(tpz.ki.CENSER_OF_ACRIMONY)                                                                           ) end, -- ENM: Pulling the Plug
         [ 897] = function() return ( player:hasKeyItem(tpz.ki.WHISPER_OF_THE_WYRMKING)                                                                      ) end, -- Quest: The Wyrmking Descends
+        [ 962] = function() return ( player:hasKeyItem(tpz.ki.MONARCH_BEARD)                                                                                ) end, -- ENM: Fire in the Sky
+        [ 963] = function() return ( player:hasKeyItem(tpz.ki.MONARCH_BEARD)                                                                                ) end, -- ENM: Bad Seed
+        [ 964] = function() return ( player:hasKeyItem(tpz.ki.MONARCH_BEARD)                                                                                ) end, -- ENM: Bugard in the Clouds
+        [ 965] = function() return ( player:hasKeyItem(tpz.ki.MONARCH_BEARD)                                                                                ) end, -- ENM: Beloved of Atlantes
         [ 928] = function() return ( player:hasCompletedMission(COP, mi.cop.ANCIENT_VOWS) or (cop == mi.cop.ANCIENT_VOWS and copStat >= 2)                  ) end, -- Quest: Ouryu Cometh
         [1057] = function() return ( player:hasCompletedQuest(JEUNO, tpz.quest.id.jeuno.APOCALYPSE_NIGH) or
                                    ( player:getQuestStatus(JEUNO, tpz.quest.id.jeuno.APOCALYPSE_NIGH) == QUEST_ACCEPTED and
-                                     player:getCharVar('ApocalypseNigh') == 4)                                                                              ) end, -- ApocalypseNigh
+                                     player:getCharVar('ApocalypseNigh') == 4)                                                                              ) end, -- Quest: Apocalypse Nigh
         [1290] = function() return ( player:hasKeyItem(tpz.ki.COSMOCLEANSE) and player:hasKeyItem(tpz.ki.RED_CARD) and npcid == getEntranceOffset(0)        ) end, -- NW Apollyon
         [1291] = function() return ( player:hasKeyItem(tpz.ki.COSMOCLEANSE) and player:hasKeyItem(tpz.ki.RED_CARD) and npcid == getEntranceOffset(0)        ) end, -- SW Apollyon
         [1292] = function() return ( player:hasKeyItem(tpz.ki.COSMOCLEANSE) and player:hasKeyItem(tpz.ki.BLACK_CARD) and npcid == getEntranceOffset(1)      ) end, -- NE Apollyon
@@ -749,7 +772,7 @@ function findBattlefields(player, npc, itemId)
     end
     for k, v in pairs(zbfs) do
         if v[3] == itemId and checkReqs(player, npc, v[2], true) and not player:battlefieldAtCapacity(v[2]) then
-            mask = bit.bor(mask,math.pow(2,v[1]))
+            mask = bit.bor(mask, math.pow(2, v[1]))
         end
     end
     return mask
@@ -781,7 +804,7 @@ function getBattlefieldMaskById(player, bfid)
     if zbfs then
         for k, v in pairs(zbfs) do
             if v[2] == bfid then
-                return math.pow(2,v[1])
+                return math.pow(2, v[1])
             end
         end
     end
@@ -813,9 +836,9 @@ function TradeBCNM(player, npc, trade, onUpdate)
     local itemId
     if not trade then
         return false
-    elseif trade:getItemCount() == 3 and trade:hasItemQty(1907,1) and trade:hasItemQty(1908,1) and trade:hasItemQty(1986,1) then
+    elseif trade:getItemCount() == 3 and trade:hasItemQty(1907, 1) and trade:hasItemQty(1908, 1) and trade:hasItemQty(1986, 1) then
         itemId = -1
-    elseif trade:getItemCount() == 4 and trade:hasItemQty(1909,1) and trade:hasItemQty(1910,1) and trade:hasItemQty(1987,1) and trade:hasItemQty(1988,1) then
+    elseif trade:getItemCount() == 4 and trade:hasItemQty(1909, 1) and trade:hasItemQty(1910, 1) and trade:hasItemQty(1987, 1) and trade:hasItemQty(1988, 1) then
         itemId = -2
     else
         itemId = trade:getItemId(0)
@@ -907,7 +930,7 @@ function EventUpdateBCNM(player, csid, option, extras)
         local clearTime = 1
         local name = "Meme"
         local partySize = 1
-        switch (battlefieldId): caseof 
+        switch (battlefieldId): caseof
         {
             [1290] = function() area = 2 end, -- NW_Apollyon
             [1291] = function() area = 1 end, -- SW_Apollyon

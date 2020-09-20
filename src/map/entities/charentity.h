@@ -203,6 +203,8 @@ public:
     uint8					m_WeaponSkills[32];
     questlog_t				m_questLog[MAX_QUESTAREA];		// список всех квестов
     missionlog_t			m_missionLog[MAX_MISSIONAREA];	// список миссий
+    eminencelog_t           m_eminenceLog;                  // Record of Eminence log
+    eminencecache_t         m_eminenceCache;                // Caching data for Eminence lookups
     assaultlog_t			m_assaultLog;					// список assault миссий
     campaignlog_t			m_campaignLog;					// список campaign миссий
     uint32					m_lastBcnmTimePrompt;			// the last message prompt in seconds
@@ -221,6 +223,8 @@ public:
         if (PParty) {
             for (auto PMember : PParty->members) {
                 func(PMember, std::forward<Args>(args)...);
+            }
+            for (auto PMember : PParty->members) {
                 for (auto PTrust : static_cast<CCharEntity*>(PMember)->PTrusts) {
                     func(PTrust, std::forward<Args>(args)...);
                 }
@@ -228,6 +232,9 @@ public:
         }
         else {
             func(this, std::forward<Args>(args)...);
+            for (auto PTrust : this->PTrusts) {
+                func(PTrust, std::forward<Args>(args)...);
+            }
         }
     }
 

@@ -288,6 +288,7 @@ bool CBattlefield::InsertEntity(CBaseEntity* PEntity, bool enter, BATTLEFIELDMOB
             {
                 ApplyLevelRestrictions(PChar);
                 m_EnteredPlayers.emplace(PEntity->id);
+                PChar->ClearTrusts();
                 luautils::OnBattlefieldEnter(PChar, this);
             }
             else if (!IsRegistered(PChar))
@@ -455,7 +456,7 @@ bool CBattlefield::RemoveEntity(CBaseEntity* PEntity, uint8 leavecode)
             PEntity->loc.zone->PushPacket(PEntity, CHAR_INRANGE, new CEntityUpdatePacket(PEntity, ENTITY_DESPAWN, UPDATE_ALL_MOB));
             m_NpcList.erase(std::remove_if(m_NpcList.begin(), m_NpcList.end(), check), m_NpcList.end());
         }
-        else if (PEntity->objtype == TYPE_MOB || PEntity->objtype == TYPE_PET || PEntity->objtype == TYPE_TRUST)
+        else if (PEntity->objtype == TYPE_MOB || PEntity->objtype == TYPE_PET)
         {
             // todo: probably need to check allegiance too cause besieged will prolly use > 0x700 too
             // allies targid >= 0x700
@@ -480,13 +481,13 @@ bool CBattlefield::RemoveEntity(CBaseEntity* PEntity, uint8 leavecode)
         }
         PEntity->loc.zone->PushPacket(PEntity, CHAR_INRANGE, new CEntityAnimationPacket(PEntity, CEntityAnimationPacket::Fade_Out));
     }
-    // assume its either a player or ally and remove any enmity
-    if (PEntity->objtype != TYPE_NPC)
+
+    // Remove enmity from valid battle entities
+    if (auto PBattleEntity = dynamic_cast<CBattleEntity*>(PEntity))
     {
-        auto entity = static_cast<CBattleEntity*>(PEntity);
-        entity->StatusEffectContainer->DelStatusEffectsByFlag(EFFECTFLAG_CONFRONTATION, true);
-        entity->StatusEffectContainer->DelStatusEffect(EFFECT_LEVEL_RESTRICTION);
-        ClearEnmityForEntity(entity);
+        PBattleEntity->StatusEffectContainer->DelStatusEffectsByFlag(EFFECTFLAG_CONFRONTATION, true);
+        PBattleEntity->StatusEffectContainer->DelStatusEffect(EFFECT_LEVEL_RESTRICTION);
+        ClearEnmityForEntity(PBattleEntity);
     }
 
     PEntity->PBattlefield = nullptr;

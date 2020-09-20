@@ -5,7 +5,7 @@
 -----------------------------------
 require("scripts/globals/conquest")
 require("scripts/globals/settings")
-require("scripts/globals/crafting")
+require("scripts/globals/status")
 require("scripts/globals/keyitems")
 -----------------------------------
 
@@ -57,15 +57,13 @@ tpz.shop =
         stock is of form {itemId1, price1, guildID, guildRank, ...}
         log is default set to -1 as it's needed as part of createShop()
     ******************************************************************************* --]]
-    generalGuild = function(player, stock, guildRank)
+    generalGuild = function(player, stock, guildSkillId)
         local log = -1
 
         player:createShop(#stock / 3, log)
 
         for i = 1, #stock, 3 do
-            if guildRank >= stock[i+2] then
-                player:addShopItem(stock[i], stock[i+1])
-            end
+            player:addShopItem(stock[i], stock[i+1], guildSkillId, stock[i+2])
         end
 
         player:sendMenu(2)
@@ -157,7 +155,7 @@ tpz.shop =
     ******************************************************************************* --]]
     generalGuildStock =
     {
-        [guild.cooking] =
+        [tpz.skill.COOKING] =
         {
                  936,      16,      tpz.craftRank.AMATEUR,      -- Rock Salt
                 4509,      12,      tpz.craftRank.AMATEUR,      -- Distilled Water
@@ -206,7 +204,7 @@ tpz.shop =
                 8911,    5300,      tpz.craftRank.AMATEUR,      -- Cooking Kit 45
                 8912,    7600,      tpz.craftRank.AMATEUR       -- Cooking Kit 50
         },
-        [guild.clothcraft] =
+        [tpz.skill.CLOTHCRAFT] =
         {
                 2128,      75,      tpz.craftRank.AMATEUR,      -- Spindle
                 2145,      75,      tpz.craftRank.AMATEUR,      -- Zephyr Thread
@@ -231,7 +229,7 @@ tpz.shop =
                 8856,    7600,      tpz.craftRank.AMATEUR,      -- Clothcraft Kit 50
                 9251, 1126125,      tpz.craftRank.AMATEUR       -- Khoma Thread
         },
-        [guild.goldsmithing] =
+        [tpz.skill.GOLDSMITHING] =
         {
                 2144,      75,      tpz.craftRank.AMATEUR,      -- Workshop Anvil
                 2143,      75,      tpz.craftRank.AMATEUR,      -- Mandrel
@@ -277,7 +275,7 @@ tpz.shop =
                 8842,    7600,      tpz.craftRank.AMATEUR,      -- Goldsmithing Kit 50
                 9249, 1126125,      tpz.craftRank.AMATEUR       -- Ruthenium Ore
         },
-        [guild.woodworking] =
+        [tpz.skill.WOODWORKING] =
         {
                 1657,     100,      tpz.craftRank.AMATEUR,      -- Bundling Twine
                  688,      25,      tpz.craftRank.AMATEUR,      -- Arrowwood Log
@@ -307,7 +305,7 @@ tpz.shop =
                 8814,    7600,      tpz.craftRank.AMATEUR,      -- Smithing Kit 50
                 9245, 1126125,      tpz.craftRank.AMATEUR       -- Cypress Log
         },
-        [guild.alchemy] =
+        [tpz.skill.ALCHEMY] =
         {
                 2131,      75,      tpz.craftRank.AMATEUR,      -- Triturator
                  912,      40,      tpz.craftRank.AMATEUR,      -- Beehive Chip
@@ -339,7 +337,7 @@ tpz.shop =
                 8898,    7600,      tpz.craftRank.AMATEUR,      -- Alchemy Kit 50
                 9257, 1126125,      tpz.craftRank.AMATEUR       -- Azure Leaf
         },
-        [guild.bonecraft] =
+        [tpz.skill.BONECRAFT] =
         {
                 2130,      75,      tpz.craftRank.AMATEUR,      -- Shagreen File
                  880,     150,      tpz.craftRank.AMATEUR,      -- Bone Chip
@@ -368,7 +366,7 @@ tpz.shop =
                 8884,    7600,      tpz.craftRank.AMATEUR,      -- Bonecraft Kit 50
                 9255, 1126125,      tpz.craftRank.AMATEUR       -- Cyan Coral
         },
-        [guild.leathercraft] =
+        [tpz.skill.LEATHERCRAFT] =
         {
                 2129,      75,      tpz.craftRank.AMATEUR,      -- Tanning Vat
                  505,     100,      tpz.craftRank.AMATEUR,      -- Sheepskin
@@ -396,7 +394,7 @@ tpz.shop =
                 8870,    7600,      tpz.craftRank.AMATEUR,      -- Leathercraft Kit 50
                 9253, 1126125,      tpz.craftRank.AMATEUR       -- Synthetic Faulpie Leather
         },
-        [guild.smithing] =
+        [tpz.skill.SMITHING] =
         {
                 2144,      75,      tpz.craftRank.AMATEUR,      -- Workshop Anvil
                 2143,      75,      tpz.craftRank.AMATEUR,      -- Mandrel

@@ -12,4 +12,4 @@ end
 
 function onMobDeath(mob, player, isKiller)
     tpz.regime.checkRegime(player, mob, 607, 2, tpz.regime.type.GROUNDS)
-end;
+end

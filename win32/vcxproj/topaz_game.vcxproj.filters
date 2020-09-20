@@ -215,6 +215,9 @@
     <ClInclude Include="..\..\src\map\items\item_currency.h">
       <Filter>Header Files\items</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\map\items\item_flowerpot.h">
+      <Filter>Header Files\items</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\map\items\item_furnishing.h">
       <Filter>Header Files\items</Filter>
     </ClInclude>
@@ -389,7 +392,7 @@
     <ClInclude Include="..\..\src\map\packets\message_basic.h">
       <Filter>Header Files\packets</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\map\packets\message_debug.h">
+    <ClInclude Include="..\..\src\map\packets\message_combat.h">
       <Filter>Header Files\packets</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\map\packets\message_special.h">
@@ -414,6 +417,15 @@
       <Filter>Header Files\packets</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\map\packets\release.h">
+      <Filter>Header Files\packets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\map\packets\roe_questlog.h">
+      <Filter>Header Files\packets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\map\packets\roe_sparkupdate.h">
+      <Filter>Header Files\packets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\map\packets\roe_update.h">
       <Filter>Header Files\packets</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\map\packets\server_ip.h">
@@ -666,6 +678,9 @@
       <Filter>Header Files\utils</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\map\utils\fishingutils.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\map\utils\gardenutils.h">
       <Filter>Header Files\utils</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\map\utils\guildutils.h">
@@ -1012,6 +1027,9 @@
     <ClCompile Include="..\..\src\map\items\item_currency.cpp">
       <Filter>Source Files\items</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\map\items\item_flowerpot.cpp">
+      <Filter>Source Files\items</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\map\items\item_furnishing.cpp">
       <Filter>Source Files\items</Filter>
     </ClCompile>
@@ -1183,7 +1201,7 @@
     <ClCompile Include="..\..\src\map\packets\message_basic.cpp">
       <Filter>Source Files\packets</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\map\packets\message_debug.cpp">
+    <ClCompile Include="..\..\src\map\packets\message_combat.cpp">
       <Filter>Source Files\packets</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\map\packets\message_special.cpp">
@@ -1209,6 +1227,15 @@
     </ClCompile>
     <ClCompile Include="..\..\src\map\packets\release.cpp">
       <Filter>Source Files\packets</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\map\packets\roe_questlog.cpp">
+      <Filter>Header Files\packets</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\map\packets\roe_sparkupdate.cpp">
+      <Filter>Header Files\packets</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\map\packets\roe_update.cpp">
+      <Filter>Header Files\packets</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\map\packets\server_ip.cpp">
       <Filter>Source Files\packets</Filter>
@@ -1463,6 +1490,9 @@
       <Filter>Source Files\utils</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\map\utils\fishingutils.cpp">
+      <Filter>Source Files\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\map\utils\gardenutils.cpp">
       <Filter>Source Files\utils</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\map\utils\guildutils.cpp">

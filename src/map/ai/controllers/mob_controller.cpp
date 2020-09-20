@@ -114,11 +114,7 @@ bool CMobController::CheckDetection(CBattleEntity* PTarget)
         TapDeaggroTime();
     }
 
-    if (m_Tick >= m_DeaggroTime + 25s)
-    {
-        return true;
-    }
-    return false;
+    return PMob->CanDeaggro() && (m_Tick >= m_DeaggroTime + 25s);
 }
 
 void CMobController::TryLink()
@@ -523,7 +519,7 @@ void CMobController::DoCombatTick(time_point tick)
     {
         return;
     }
-    else if (m_Tick >= m_LastMobSkillTime && tpzrand::GetRandomNumber(100) < PMob->TPUseChance() && MobSkill())
+    else if (m_Tick >= m_LastMobSkillTime && tpzrand::GetRandomNumber(10000) <= PMob->TPUseChance() && MobSkill())
     {
         return;
     }
@@ -729,7 +725,7 @@ void CMobController::DoRoamTick(time_point tick)
             }
 
             // can't rest with poison or disease
-            if (PMob->CanRest())
+            if (PMob->CanRest() && PMob->getMobMod(MOBMOD_NO_REST) == 0)
             {
                 // recover 10% health
                 if (PMob->Rest(0.1f))
